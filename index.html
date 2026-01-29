@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Lớp 7A7</title>
+    <title>Lớp 7A7</title>
     <style>
       body {
           font-family: Arial, sans-serif;
@@ -26,173 +26,477 @@
           border: 2px solid #000000;
           border-radius: 15px;
           font-family: 'Times New Roman', Times, serif;
+          font-size: 20px;
       }
 
       .button:hover {
           background-color: #3b7d3c;
       }
 
-      .answers-list {
+      .fade-out {
+          animation: fadeOut 0.5s ease-out forwards !important;
+      }
+
+      .fade-in {
+          animation: fadeIn 0.5s ease-out forwards !important;
+      }
+
+      @keyframes fadeOut {
+          from {
+              opacity: 1;
+          }
+          to {
+              opacity: 0;
+          }
+      }
+
+      @keyframes fadeIn {
+          from {
+              opacity: 0;
+          }
+          to {
+              opacity: 1;
+          }
+      }
+
+      .question-container {
+          display: none;
+          position: fixed;
+          bottom: 50%;
+          left: 50%;
+          transform: translate(-50%, 50%);
           background-color: white;
-          padding: 20px;
+          padding: 30px;
           border-radius: 15px;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          max-width: 800px;
-          margin: 20px auto;
-          text-align: left;
+          max-width: 500px;
+          width: 80%;
+          opacity: 0;
       }
 
-      .answer-item {
-          border-bottom: 1px solid #ddd;
-          padding: 10px 0;
+      .question-container h2 {
+          color: #498e4c;
+          margin-bottom: 20px;
       }
 
-      .answer-item:last-child {
-          border-bottom: none;
-      }
-
-      .blank-space {
-          border: 1px dashed #ccc;
-          height: 20px; /* Creates a visible blank space */
+      .question-container input {
+          width: 100%;
+          padding: 10px;
           margin: 10px 0;
+          border: 2px solid #498e4c;
+          border-radius: 15px;
+          font-size: 16px;
+          box-sizing: border-box;
       }
 
-      .no-answers {
-          color: #666;
-          font-style: italic;
+      .question-container input.error {
+          border-color: #d32f2f;
+          animation: shake 0.3s;
       }
+
+      @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-10px); }
+          75% { transform: translateX(10px); }
+      }
+
+      .hidden {
+          display: none !important;
+      }
+
+      .already-submitted {
+          display: none;
+          position: fixed;
+          bottom: 50%;
+          left: 50%;
+          transform: translate(-50%, 50%);
+          background-color: white;
+          padding: 30px;
+          border-radius: 15px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          max-width: 500px;
+          width: 80%;
+          text-align: center;
+      }
+
+      .already-submitted h2 {
+          color: #498e4c;
+          margin-bottom: 20px;
+      }
+
+      .blank-page {
+          display: none;
+          text-align: center;
+          padding: 50px;
+      }
+
+        .working-message {
+    display: none;
+    text-align: center;
+    padding: 50px;
+    font-size: 24px;
+    color: #498e4c;
+}
     </style>
 </head>
 <body>
-    <h1>Admin Panel - Lớp 7A7</h1>
-    <p>Đây là nơi xem và tải xuống câu trả lời từ người dùng.</p>
-    
-    <button class="button" onclick="loadAnswers()">Tải lại câu trả lời</button>
-    <button class="button" onclick="downloadAnswers()">Tải xuống JSON</button>
-    <button class="button" onclick="acceptAndReset()">Accept</button>
-    
-    <div class="answers-list" id="answersList">
-        <p class="no-answers">Chưa có câu trả lời nào. Nhấn "Tải lại câu trả lời" để kiểm tra.</p>
+    <h1 class="HiddenEl">Chào mừng đến với lớp 7A7!</h1>
+    <p class="HiddenEl">Để có thể vào nhóm lớp thì website xin phép hỏi một chút câu hỏi!</p>
+    <button id="myBtn" class="button HiddenEl">Ok</button>
+    <h6 class="HiddenEl">(Không phải thành viên lớp thì cút)</h6>
+
+    <!-- Already Submitted Message -->
+    <div class="already-submitted" id="alreadySubmitted">
+        <h2>Đã gửi câu trả lời!</h2>
+        <p>Hãy chờ 1-2 ngày để xác minh thành viên!</p>
     </div>
 
-    <script>
-      // Password for admin access (change this to your desired password)
-      const PASSWORD = 'admin123';  // ← CHANGE THIS TO YOUR PASSWORD
+    <!-- Blank Page for Reset -->
+    <div class="blank-page" id="blankPage">
+        <p>Trang đã được reset.</p>
+    </div>
 
-      // Password check on page load
+    <!-- Question 1: Personal -->
+    <div class="question-container" id="question1">
+        <h2>Câu hỏi 1</h2>
+        <p>Bạn tên là gì?</p>
+        <input type="text" id="answer1" placeholder="Đầy đủ họ tên">
+        <button class="button" onclick="nextQuestion(1)">Tiếp tục</button>
+    </div>
+
+    <!-- Question 2: Personal -->
+    <div class="question-container" id="question2">
+        <h2>Câu hỏi 2</h2>
+        <p>Ngày tháng năm sinh?</p>
+        <input type="text" id="answer2" placeholder="Đầy đủ ngày tháng...">
+        <button class="button" onclick="nextQuestion(2)">Tiếp tục</button>
+    </div>
+
+    <!-- Identity Confirmation -->
+    <div class="question-container" id="identity">
+        <h2>Xác nhận danh tính</h2>
+        <p>Ok, giờ đã lấy được sơ qua thông tin cá nhân.</p>
+        <p>Bây giờ hãy trả lời 2 câu hỏi về lớp 7A7 nhé!</p>
+        <button class="button" onclick="nextQuestion(3)">Tiếp tục</button>
+    </div>
+
+    <!-- Question 3: About Class -->
+    <div class="question-container" id="question3">
+        <h2>Câu hỏi 3</h2>
+        <p>Lớp 7A7 có bao nhiêu học sinh?</p>
+        <input type="text" id="answer3" placeholder="Nhập câu trả lời...">
+        <button class="button" onclick="nextQuestion(4)">Tiếp tục</button>
+    </div>
+
+    <!-- Question 4: About Class -->
+    <div class="question-container" id="question4">
+        <h2>Câu hỏi 4</h2>
+        <p>Bạn ngồi ở bàn nào?</p>
+        <input type="text" id="answer4" placeholder="Tổ, hàng...(vd: Tổ 4, hàng 36)">
+        <button class="button" onclick="submitAnswers()">Hoàn thành</button>
+    </div>
+
+    <!-- Final Message -->
+    <div class="question-container" id="final">
+        <h2>Xong!!</h2>
+        <p id="finalMessage">Đang gửi câu trả lời...</p>
+    </div>
+
+    <!-- Still Working On Message -->
+<div class="working-message" id="workingMessage">
+    <h1>Still working on</h1>
+    <p>Please check back later.</p>
+</div>
+    <script>
+      // THAY ĐỔI EMAIL CỦA BẠN Ở ĐÂY
+      const YOUR_EMAIL = 'tamtt.jps@gmail.com';  // ← ĐỔI EMAIL NÀY
+      const FORM_URL = `https://formsubmit.co/ajax/${YOUR_EMAIL}`;
+      
+      const answers = {};
+
+      // Check if already submitted on page load
       window.addEventListener('load', function() {
-        const enteredPassword = prompt('Enter the admin password to access this panel:');
-        if (enteredPassword !== PASSWORD) {
-          alert('Incorrect password. Access denied.');
-          // Redirect to main page (adjust URL if needed)
-          window.location.href = './index.html';  // Assumes main page is index.html in the same folder
-          return;  // Stop loading the rest of the page
+        if (localStorage.getItem('7A7_submitted')) {
+          // Hide initial elements and show already submitted message
+          const hiddenEls = document.getElementsByClassName('HiddenEl');
+          for (let el of hiddenEls) {
+            el.style.display = 'none';
+          }
+          document.getElementById('alreadySubmitted').style.display = 'block';
         }
-        // If password is correct, proceed to load answers
-        loadAnswers();
       });
 
-      function loadAnswers() {
-        const answersList = document.getElementById('answersList');
-        answersList.innerHTML = ''; // Clear previous content
-        
-        let hasAnswers = false;
-        
-        // Loop through all localStorage keys
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          
-          // Check for pending answers (keys starting with '7A7_pending_')
-          if (key.startsWith('7A7_pending_')) {
-            hasAnswers = true;
-            const data = JSON.parse(localStorage.getItem(key));
-            
-            const answerItem = document.createElement('div');
-            answerItem.className = 'answer-item';
-            
-            // If data is empty (deleted), show blank space
-            if (Object.keys(data).length === 0) {
-              answerItem.innerHTML = '<div class="blank-space"></div>';
-            } else {
-              answerItem.innerHTML = `
-                <strong>Tên:</strong> ${data.name || 'N/A'}<br>
-                <strong>Ngày sinh:</strong> ${data.birthday || 'N/A'}<br>
-                <strong>Số học sinh lớp:</strong> ${data.studentCount || 'N/A'}<br>
-                <strong>Số bàn:</strong> ${data.deskNumber || 'N/A'}<br>
-                <strong>Thời gian:</strong> ${new Date(parseInt(key.replace('7A7_pending_', ''))).toLocaleString('vi-VN')}<br>
-                <button class="button" onclick="deleteAnswer('${key}')">Xóa</button>
-              `;
-            }
-            answersList.appendChild(answerItem);
+      // Enter key listener
+      document.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+          if (!document.getElementById('question1').classList.contains('hidden')) {
+            nextQuestion(1);
+          } else if (!document.getElementById('question2').classList.contains('hidden')) {
+            nextQuestion(2);
+          } else if (!document.getElementById('identity').classList.contains('hidden')) {
+            nextQuestion(3);
+          } else if (!document.getElementById('question3').classList.contains('hidden')) {
+            nextQuestion(4);
+          } else if (!document.getElementById('question4').classList.contains('hidden')) {
+            submitAnswers();
           }
         }
+      });
+
+      function focusInput(inputId) {
+        setTimeout(() => {
+          const input = document.getElementById(inputId);
+          if (input) {
+            input.focus();
+          }
+        }, 600);
+      }
+
+      function validateInput(inputId) {
+        const input = document.getElementById(inputId);
+        const value = input.value.trim();
         
-        if (!hasAnswers) {
-          answersList.innerHTML = '<p class="no-answers">Không có câu trả lời nào.</p>';
+        if (!value) {
+          input.classList.add('error');
+          setTimeout(() => {
+            input.classList.remove('error');
+          }, 300);
+          return false;
+        }
+
+        // Specific validations
+        if (inputId === 'answer1') {
+          // Name: At least 2 words, each word at least 2-3 letters
+          const words = value.split(/\s+/);
+          if (words.length < 2 || words.some(word => word.length < 2)) {
+            input.classList.add('error');
+            setTimeout(() => {
+              input.classList.remove('error');
+            }, 300);
+            return false;
+          }
+        } else if (inputId === 'answer2') {
+          // Birthday: Must be in DD/MM/YYYY format (1-2 digits for day/month), valid date, and year 2012, 2013, or 2014
+          const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+          const match = value.match(dateRegex);
+          if (!match) {
+            input.classList.add('error');
+            setTimeout(() => {
+              input.classList.remove('error');
+            }, 300);
+            return false;
+          }
+          const day = parseInt(match[1], 10);
+          const month = parseInt(match[2], 10);
+          const year = parseInt(match[3], 10);
+          const date = new Date(year, month - 1, day);
+          if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day || (year !== 2012 && year !== 2013 && year !== 2014)) {
+            input.classList.add('error');
+            setTimeout(() => {
+              input.classList.remove('error');
+            }, 300);
+            return false;
+          }
+        } else if (inputId === 'answer4') {
+          // Desk: Must contain "tổ" and "hàng" (case-insensitive)
+          const lowerValue = value.toLowerCase();
+          if (!lowerValue.includes('tổ') || !lowerValue.includes('hàng')) {
+            input.classList.add('error');
+            setTimeout(() => {
+              input.classList.remove('error');
+            }, 300);
+            return false;
+          }
+        }
+
+        return true;
+      }
+
+      async function sendToEmail(data) {
+        const FORM_URL = `https://formsubmit.co/ajax/${YOUR_EMAIL}`;  // Your email (keep this)
+        const CUSTOM_WEBSITE_URL = 'https://your-other-website.com/receive-answers.php';  // ← REPLACE WITH YOUR ACTUAL URL (e.g., https://mysite.com/receive-answers.php)
+        const API_KEY = 'k8j2m9p4q7r5t1v3w6x0y8z';  // ← REPLACE WITH YOUR GENERATED API KEY (32 random characters)
+        
+        try {
+          // Send to email (unchanged)
+          const emailResponse = await fetch(FORM_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              '📝 Tên': data.name,
+              '🎂 Ngày sinh': data.birthday,
+              '👥 Số học sinh lớp 7A7': data.studentCount,
+              '💺 Số bàn': data.deskNumber,
+              '⏰ Thời gian': new Date().toLocaleString('vi-VN')
+            })
+          });
+          
+          // Send to your custom website
+          const customResponse = await fetch(CUSTOM_WEBSITE_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${API_KEY}`  // Sends the API key for security
+            },
+            body: JSON.stringify({
+              name: data.name,
+              birthday: data.birthday,
+              studentCount: data.studentCount,
+              deskNumber: data.deskNumber,
+              timestamp: new Date().toLocaleString('vi-VN')
+            })
+          });
+          
+          console.log('Email sent:', emailResponse.ok);
+          console.log('Custom website sent:', customResponse.ok);
+          return emailResponse.ok && customResponse.ok;  // Success if both work
+        } catch (error) {
+          console.error('Error sending:', error);
+          // Save locally as backup
+          localStorage.setItem('7A7_pending_' + Date.now(), JSON.stringify(data));
+          return false;
         }
       }
 
-      function downloadAnswers() {
-        const data = {};
+      function nextQuestion(step) {
+        let currentBox, nextBox, nextInputId, currentInputId;
+
+        if (step === 1) {
+          currentInputId = 'answer1';
+          if (!validateInput(currentInputId)) return;
+          
+          answers.name = document.getElementById(currentInputId).value.trim();
+          
+          currentBox = document.getElementById('question1');
+          nextBox = document.getElementById('question2');
+          nextInputId = 'answer2';
+        } 
+        else if (step === 2) {
+          currentInputId = 'answer2';
+          if (!validateInput(currentInputId)) return;
+          
+          answers.birthday = document.getElementById(currentInputId).value.trim();
+          
+          currentBox = document.getElementById('question2');
+          nextBox = document.getElementById('identity');
+          nextInputId = null;
+        }
+        else if (step === 3) {
+          currentBox = document.getElementById('identity');
+          nextBox = document.getElementById('question3');
+          nextInputId = 'answer3';
+        }
+        else if (step === 4) {
+          currentInputId = 'answer3';
+          if (!validateInput(currentInputId)) return;
+          
+          answers.studentCount = document.getElementById(currentInputId).value.trim();
+          
+          currentBox = document.getElementById('question3');
+          nextBox = document.getElementById('question4');
+          nextInputId = 'answer4';
+        }
+
+        currentBox.classList.remove('slide-up', 'fade-in');  // Note: 'slide-up' is removed here in case it was added elsewhere
+        void currentBox.offsetWidth;
+        currentBox.classList.add('fade-out');
         
-        // Collect all pending answers (skip blank ones)
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key.startsWith('7A7_pending_')) {
-            const itemData = JSON.parse(localStorage.getItem(key));
-            if (Object.keys(itemData).length > 0) {  // Only include non-blank
-              data[key] = itemData;
-            }
+        setTimeout(() => {
+          currentBox.classList.add('hidden');
+          currentBox.classList.remove('fade-out');
+          currentBox.style.opacity = '0';
+          
+          nextBox.classList.remove('hidden');
+          nextBox.style.display = 'block';
+          nextBox.style.opacity = '0';
+          void nextBox.offsetWidth;
+          nextBox.classList.add('fade-in');
+
+          if (nextInputId) {
+            focusInput(nextInputId);
           }
-        }
-        
-        if (Object.keys(data).length === 0) {
-          alert('Không có câu trả lời nào để tải xuống.');
-          return;
-        }
-        
-        // Create and download JSON file
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = '7A7_answers_' + new Date().toISOString().split('T')[0] + '.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        }, 500);
       }
 
-      function deleteAnswer(key) {
-        if (confirm('Bạn có chắc muốn xóa câu trả lời này?')) {
-          // Replace with empty object to create blank space
-          localStorage.setItem(key, JSON.stringify({}));
-          loadAnswers(); // Reload the list
-        }
-      }
+      async function submitAnswers() {
+        const currentInputId = 'answer4';
+        if (!validateInput(currentInputId)) return;
+        
+        answers.deskNumber = document.getElementById(currentInputId).value.trim();
+        
+        const currentBox = document.getElementById('question4');
+        const finalBox = document.getElementById('final');
+        
+        currentBox.classList.remove('fade-in');
+        void currentBox.offsetWidth;
+        currentBox.classList.add('fade-out');
+        
+        setTimeout(async () => {
+          currentBox.classList.add('hidden');
+          currentBox.classList.remove('fade-out');
+          
+          finalBox.classList.remove('hidden');
+          finalBox.style.display = 'block';
+          finalBox.classList.add('fade-in');
+          
+          // Send to email and custom website
+          const success = await sendToEmail(answers);
+          
+          const finalMessage = document.getElementById('finalMessage');
+          if (success) {
+            finalMessage.innerHTML = 'Câu trả lời đã được gửi!<br>Hãy chờ 1-2 ngày để xác minh thành viên!';
+          } else {
+            finalMessage.innerHTML = 'Câu trả lời đã được lưu!<br><small>Sẽ gửi khi có internet.</small>';
+          }
 
-      function acceptAndReset() {
-        if (confirm('Bạn có chắc muốn chấp nhận và reset? Điều này sẽ xóa tất cả câu trả lời và đặt trạng thái "still working on" trên trang chính.')) {
-          // Clear all pending answers
-          for (let i = localStorage.length - 1; i >= 0; i--) {
-            const key = localStorage.key(i);
-            if (key.startsWith('7A7_pending_')) {
-              localStorage.removeItem(key);
-            }
+          // Mark as submitted in localStorage
+          localStorage.setItem('7A7_submitted', 'true');
+        }, 500);
+      }          
+// Check if already submitted or in working status on page load
+window.addEventListener('load', function() {
+  const status = localStorage.getItem('7A7_status');
+  if (status === 'working') {
+    // Show "still working on" message and hide everything else
+    document.body.innerHTML = '';
+    document.body.style.backgroundColor = '#a9d593';
+    document.body.innerHTML = '<div class="working-message" style="display: block;"><h1>Still working on</h1><p>Please check back later.</p></div>';
+  } else if (localStorage.getItem('7A7_submitted')) {
+    // Hide initial elements and show already submitted message
+    const hiddenEls = document.getElementsByClassName('HiddenEl');
+    for (let el of hiddenEls) {
+      el.style.display = 'none';
+    }
+    document.getElementById('alreadySubmitted').style.display = 'block';
+  }
+});
+      const button = document.getElementById("myBtn");
+      const questionBox = document.getElementById("question1");
+      
+      function hideElements() {
+        const elements = document.getElementsByClassName("HiddenEl");
+        for (let i = 0; i < elements.length; i++) {
+          elements[i].classList.add("fade-out");
+        }
+        
+        setTimeout(() => {
+          for (let i = 0; i < elements.length; i++) {
+            elements[i].style.display = "none";
           }
           
-          // Clear submitted status
-          localStorage.removeItem('7A7_submitted');
-          
-          // Set status to 'working' to show "still working on" on main page
-          localStorage.setItem('7A7_status', 'working');
-          
-          // Reload the answers list
-          loadAnswers();
-          
-          alert('Đã chấp nhận và reset. Trang chính giờ sẽ hiển thị "still working on".');
-        }
+          questionBox.classList.remove('hidden');  // Ensure no 'hidden' class
+          questionBox.style.display = 'block';
+          questionBox.style.opacity = '0';
+          void questionBox.offsetWidth;
+          questionBox.classList.add("fade-in");
+          focusInput('answer1');
+        }, 500);
       }
+
+      button.addEventListener("click", hideElements);
     </script>
 </body>
 </html>
