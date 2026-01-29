@@ -33,15 +33,6 @@
           background-color: #3b7d3c;
       }
 
-      .reset-button {
-          position: fixed;
-          bottom: 10px;
-          right: 10px;
-          font-size: 12px;
-          padding: 5px 10px;
-          opacity: 0.5; /* Semi-hidden */
-      }
-
       .fade-out {
           animation: fadeOut 0.5s ease-out forwards !important;
       }
@@ -451,14 +442,6 @@
           localStorage.setItem('7A7_submitted', 'true');
         }, 500);
       }          
-          // Hide all elements and show blank page
-          document.body.innerHTML = '';
-          document.body.style.backgroundColor = '#a9d593';
-          document.body.innerHTML = '<div class="blank-page" style="display: block;"><p>Trang đã được reset.</p></div>';
-        } else {
-          alert('Incorrect password.');
-        }
-      }
 
       const button = document.getElementById("myBtn");
       const questionBox = document.getElementById("question1");
