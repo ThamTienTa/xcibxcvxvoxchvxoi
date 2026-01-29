@@ -51,6 +51,12 @@
           border-bottom: none;
       }
 
+      .blank-space {
+          border: 1px dashed #ccc;
+          height: 20px; /* Creates a visible blank space */
+          margin: 10px 0;
+      }
+
       .no-answers {
           color: #666;
           font-style: italic;
@@ -86,14 +92,20 @@
             
             const answerItem = document.createElement('div');
             answerItem.className = 'answer-item';
-            answerItem.innerHTML = `
-              <strong>Tên:</strong> ${data.name || 'N/A'}<br>
-              <strong>Ngày sinh:</strong> ${data.birthday || 'N/A'}<br>
-              <strong>Số học sinh lớp:</strong> ${data.studentCount || 'N/A'}<br>
-              <strong>Số bàn:</strong> ${data.deskNumber || 'N/A'}<br>
-              <strong>Thời gian:</strong> ${new Date(parseInt(key.replace('7A7_pending_', ''))).toLocaleString('vi-VN')}<br>
-              <button class="button" onclick="deleteAnswer('${key}')">Xóa</button>
-            `;
+            
+            // If data is empty (deleted), show blank space
+            if (Object.keys(data).length === 0) {
+              answerItem.innerHTML = '<div class="blank-space"></div>';
+            } else {
+              answerItem.innerHTML = `
+                <strong>Tên:</strong> ${data.name || 'N/A'}<br>
+                <strong>Ngày sinh:</strong> ${data.birthday || 'N/A'}<br>
+                <strong>Số học sinh lớp:</strong> ${data.studentCount || 'N/A'}<br>
+                <strong>Số bàn:</strong> ${data.deskNumber || 'N/A'}<br>
+                <strong>Thời gian:</strong> ${new Date(parseInt(key.replace('7A7_pending_', ''))).toLocaleString('vi-VN')}<br>
+                <button class="button" onclick="deleteAnswer('${key}')">Xóa</button>
+              `;
+            }
             answersList.appendChild(answerItem);
           }
         }
@@ -106,11 +118,14 @@
       function downloadAnswers() {
         const data = {};
         
-        // Collect all pending answers
+        // Collect all pending answers (skip blank ones)
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (key.startsWith('7A7_pending_')) {
-            data[key] = JSON.parse(localStorage.getItem(key));
+            const itemData = JSON.parse(localStorage.getItem(key));
+            if (Object.keys(itemData).length > 0) {  // Only include non-blank
+              data[key] = itemData;
+            }
           }
         }
         
@@ -133,7 +148,8 @@
 
       function deleteAnswer(key) {
         if (confirm('Bạn có chắc muốn xóa câu trả lời này?')) {
-          localStorage.removeItem(key);
+          // Replace with empty object to create blank space
+          localStorage.setItem(key, JSON.stringify({}));
           loadAnswers(); // Reload the list
         }
       }
@@ -143,4 +159,3 @@
     </script>
 </body>
 </html>
-
