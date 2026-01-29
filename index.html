@@ -74,23 +74,6 @@
           opacity: 0;
       }
 
-      .question-container.slide-up {
-          display: block;
-          animation: slideUp 0.6s ease-out forwards;
-      }
-
-      @keyframes slideUp {
-          from {
-              bottom: -100%;
-              opacity: 0;
-          }
-          to {
-              bottom: 50%;
-              transform: translate(-50%, 50%);
-              opacity: 1;
-          }
-      }
-
       .question-container h2 {
           color: #498e4c;
           margin-bottom: 20px;
@@ -288,7 +271,7 @@
           nextInputId = 'answer4';
         }
 
-        currentBox.classList.remove('slide-up', 'fade-in');
+        currentBox.classList.remove('slide-up', 'fade-in');  // Note: 'slide-up' is removed here in case it was added elsewhere
         void currentBox.offsetWidth;
         currentBox.classList.add('fade-out');
         
@@ -356,7 +339,11 @@
             elements[i].style.display = "none";
           }
           
-          questionBox.classList.add("slide-up");
+          questionBox.classList.remove('hidden');  // Ensure no 'hidden' class
+          questionBox.style.display = 'block';
+          questionBox.style.opacity = '0';
+          void questionBox.offsetWidth;
+          questionBox.classList.add("fade-in");
           focusInput('answer1');
         }, 500);
       }
