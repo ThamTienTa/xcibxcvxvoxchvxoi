@@ -214,8 +214,8 @@
             return false;
           }
         } else if (inputId === 'answer2') {
-          // Birthday: Must be in DD/MM/YYYY format, valid date, and year 2012, 2013, or 2014
-          const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+          // Birthday: Must be in DD/MM/YYYY format (1-2 digits for day/month), valid date, and year 2012, 2013, or 2014
+          const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
           const match = value.match(dateRegex);
           if (!match) {
             input.classList.add('error');
