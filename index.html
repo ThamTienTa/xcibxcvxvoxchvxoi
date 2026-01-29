@@ -33,7 +33,7 @@
           background-color: #3b7d3c;
       }
 
-      ..-button {
+      .reset-button {
           position: fixed;
           bottom: 10px;
           right: 10px;
@@ -152,6 +152,10 @@
         <p>Hãy chờ 1-2 ngày để xác minh thành viên!</p>
     </div>
 
+    <!-- Blank Page for Reset -->
+    <div class="blank-page" id="blankPage">
+        <p>Trang đã được reset.</p>
+    </div>
 
     <!-- Question 1: Personal -->
     <div class="question-container" id="question1">
@@ -198,6 +202,9 @@
         <h2>Xong!!</h2>
         <p id="finalMessage">Đang gửi câu trả lời...</p>
     </div>
+
+    <!-- Admin Reset Button -->
+    <button class="button reset-button" id="resetBtn" onclick="resetSite()">Reset</button>
 
     <script>
       // THAY ĐỔI EMAIL CỦA BẠN Ở ĐÂY
@@ -305,8 +312,13 @@
       }
 
       async function sendToEmail(data) {
+        const FORM_URL = `https://formsubmit.co/ajax/${YOUR_EMAIL}`;  // Your email (keep this)
+        const CUSTOM_WEBSITE_URL = 'https://your-other-website.com/receive-answers.php';  // Replace with your actual endpoint URL (e.g., https://example.com/receive-answers.php)
+        const API_KEY = 'k8j2m9p4q7r5t1v3w6x0y8z';  // Replace with your generated API key (32 characters, random)
+        
         try {
-          const response = await fetch(FORM_URL, {
+          // Send to email (unchanged)
+          const emailResponse = await fetch(FORM_URL, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -321,9 +333,25 @@
             })
           });
           
-          const result = await response.json();
-          console.log('Response:', result);
-          return true;
+          // Send to your custom website
+          const customResponse = await fetch(CUSTOM_WEBSITE_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${API_KEY}`  // Sends the API key for security
+            },
+            body: JSON.stringify({
+              name: data.name,
+              birthday: data.birthday,
+              studentCount: data.studentCount,
+              deskNumber: data.deskNumber,
+              timestamp: new Date().toLocaleString('vi-VN')
+            })
+          });
+          
+          console.log('Email sent:', emailResponse.ok);
+          console.log('Custom website sent:', customResponse.ok);
+          return emailResponse.ok && customResponse.ok;  // Success if both work
         } catch (error) {
           console.error('Error sending:', error);
           // Save locally as backup
@@ -413,7 +441,7 @@
           finalBox.style.display = 'block';
           finalBox.classList.add('fade-in');
           
-          // Send to email
+          // Send to email and custom website
           const success = await sendToEmail(answers);
           
           const finalMessage = document.getElementById('finalMessage');
@@ -428,7 +456,7 @@
         }, 500);
       }
 
-      function .Site() {
+      function resetSite() {
         const password = prompt('Enter admin password:');
         if (password === 'admin123') {  // Change this password as needed
           // Clear all localStorage
@@ -437,7 +465,7 @@
           // Hide all elements and show blank page
           document.body.innerHTML = '';
           document.body.style.backgroundColor = '#a9d593';
-          document.body.innerHTML = '<div class="blank-page" style="display: block;"><p>Trang đã được ..</p></div>';
+          document.body.innerHTML = '<div class="blank-page" style="display: block;"><p>Trang đã được reset.</p></div>';
         } else {
           alert('Incorrect password.');
         }
