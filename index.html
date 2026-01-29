@@ -33,7 +33,7 @@
           background-color: #3b7d3c;
       }
 
-      .reset-button {
+      ..-button {
           position: fixed;
           bottom: 10px;
           right: 10px;
@@ -152,10 +152,6 @@
         <p>Hãy chờ 1-2 ngày để xác minh thành viên!</p>
     </div>
 
-    <!-- Blank Page for Reset -->
-    <div class="blank-page" id="blankPage">
-        <p>Trang đã được reset.</p>
-    </div>
 
     <!-- Question 1: Personal -->
     <div class="question-container" id="question1">
@@ -202,9 +198,6 @@
         <h2>Xong!!</h2>
         <p id="finalMessage">Đang gửi câu trả lời...</p>
     </div>
-
-    <!-- Admin Reset Button -->
-    <button class="button reset-button" id="resetBtn" onclick="resetSite()">Reset</button>
 
     <script>
       // THAY ĐỔI EMAIL CỦA BẠN Ở ĐÂY
@@ -435,7 +428,7 @@
         }, 500);
       }
 
-      function resetSite() {
+      function .Site() {
         const password = prompt('Enter admin password:');
         if (password === 'admin123') {  // Change this password as needed
           // Clear all localStorage
@@ -444,7 +437,7 @@
           // Hide all elements and show blank page
           document.body.innerHTML = '';
           document.body.style.backgroundColor = '#a9d593';
-          document.body.innerHTML = '<div class="blank-page" style="display: block;"><p>Trang đã được reset.</p></div>';
+          document.body.innerHTML = '<div class="blank-page" style="display: block;"><p>Trang đã được ..</p></div>';
         } else {
           alert('Incorrect password.');
         }
