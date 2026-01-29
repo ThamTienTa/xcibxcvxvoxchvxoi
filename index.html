@@ -202,10 +202,6 @@
         <h2>Xong!!</h2>
         <p id="finalMessage">Đang gửi câu trả lời...</p>
     </div>
-
-    <!-- Admin Reset Button -->
-    <button class="button reset-button" id="resetBtn" onclick="resetSite()">Reset</button>
-
     <script>
       // THAY ĐỔI EMAIL CỦA BẠN Ở ĐÂY
       const YOUR_EMAIL = 'tamtt.jps@gmail.com';  // ← ĐỔI EMAIL NÀY
@@ -454,14 +450,7 @@
           // Mark as submitted in localStorage
           localStorage.setItem('7A7_submitted', 'true');
         }, 500);
-      }
-
-      function resetSite() {
-        const password = prompt('Enter admin password:');
-        if (password === 'admin123') {  // Change this password as needed
-          // Clear all localStorage
-          localStorage.clear();
-          
+      }          
           // Hide all elements and show blank page
           document.body.innerHTML = '';
           document.body.style.backgroundColor = '#a9d593';
