@@ -69,6 +69,7 @@
     
     <button class="button" onclick="loadAnswers()">Tải lại câu trả lời</button>
     <button class="button" onclick="downloadAnswers()">Tải xuống JSON</button>
+    <button class="button" onclick="acceptAndReset()">Accept</button>  <!-- New Accept button -->
     
     <div class="answers-list" id="answersList">
         <p class="no-answers">Chưa có câu trả lời nào. Nhấn "Tải lại câu trả lời" để kiểm tra.</p>
@@ -151,6 +152,29 @@
           // Replace with empty object to create blank space
           localStorage.setItem(key, JSON.stringify({}));
           loadAnswers(); // Reload the list
+        }
+      }
+
+      function acceptAndReset() {
+        if (confirm('Bạn có chắc muốn chấp nhận và reset? Điều này sẽ xóa tất cả câu trả lời và đặt trạng thái "still working on" trên trang chính.')) {
+          // Clear all pending answers
+          for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key.startsWith('7A7_pending_')) {
+              localStorage.removeItem(key);
+            }
+          }
+          
+          // Clear submitted status
+          localStorage.removeItem('7A7_submitted');
+          
+          // Set status to 'working' to show "still working on" on main page
+          localStorage.setItem('7A7_status', 'working');
+          
+          // Reload the answers list
+          loadAnswers();
+          
+          alert('Đã chấp nhận và reset. Trang chính giờ sẽ hiển thị "still working on".');
         }
       }
 
