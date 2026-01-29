@@ -129,6 +129,14 @@
           text-align: center;
           padding: 50px;
       }
+
+        .working-message {
+    display: none;
+    text-align: center;
+    padding: 50px;
+    font-size: 24px;
+    color: #498e4c;
+}
     </style>
 </head>
 <body>
@@ -193,6 +201,11 @@
         <h2>Xong!!</h2>
         <p id="finalMessage">Đang gửi câu trả lời...</p>
     </div>
+    <!-- Still Working On Message -->
+<div class="working-message" id="workingMessage">
+    <h1>Still working on</h1>
+    <p>Please check back later.</p>
+</div>
     <script>
       // THAY ĐỔI EMAIL CỦA BẠN Ở ĐÂY
       const YOUR_EMAIL = 'tamtt.jps@gmail.com';  // ← ĐỔI EMAIL NÀY
@@ -438,6 +451,24 @@
             finalMessage.innerHTML = 'Câu trả lời đã được lưu!<br><small>Sẽ gửi khi có internet.</small>';
           }
 
+            // Check if already submitted or in working status on page load
+window.addEventListener('load', function() {
+  const status = localStorage.getItem('7A7_status');
+  if (status === 'working') {
+    // Show "still working on" message and hide everything else
+    document.body.innerHTML = '';
+    document.body.style.backgroundColor = '#a9d593';
+    document.body.innerHTML = '<div class="working-message" style="display: block;"><h1>Still working on</h1><p>Please check back later.</p></div>';
+  } else if (localStorage.getItem('7A7_submitted')) {
+    // Hide initial elements and show already submitted message
+    const hiddenEls = document.getElementsByClassName('HiddenEl');
+    for (let el of hiddenEls) {
+      el.style.display = 'none';
+    }
+    document.getElementById('alreadySubmitted').style.display = 'block';
+  }
+});
+            
           // Mark as submitted in localStorage
           localStorage.setItem('7A7_submitted', 'true');
         }, 500);
