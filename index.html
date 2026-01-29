@@ -201,6 +201,52 @@
           }, 300);
           return false;
         }
+
+        // Specific validations
+        if (inputId === 'answer1') {
+          // Name: At least 2 words, each word at least 2-3 letters
+          const words = value.split(/\s+/);
+          if (words.length < 2 || words.some(word => word.length < 2)) {
+            input.classList.add('error');
+            setTimeout(() => {
+              input.classList.remove('error');
+            }, 300);
+            return false;
+          }
+        } else if (inputId === 'answer2') {
+          // Birthday: Must be in DD/MM/YYYY format and a valid date
+          const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+          const match = value.match(dateRegex);
+          if (!match) {
+            input.classList.add('error');
+            setTimeout(() => {
+              input.classList.remove('error');
+            }, 300);
+            return false;
+          }
+          const day = parseInt(match[1], 10);
+          const month = parseInt(match[2], 10);
+          const year = parseInt(match[3], 10);
+          const date = new Date(year, month - 1, day);
+          if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+            input.classList.add('error');
+            setTimeout(() => {
+              input.classList.remove('error');
+            }, 300);
+            return false;
+          }
+        } else if (inputId === 'answer4') {
+          // Desk: Must contain "tổ" and "hàng" (case-insensitive)
+          const lowerValue = value.toLowerCase();
+          if (!lowerValue.includes('tổ') || !lowerValue.includes('hàng')) {
+            input.classList.add('error');
+            setTimeout(() => {
+              input.classList.remove('error');
+            }, 300);
+            return false;
+          }
+        }
+
         return true;
       }
 
