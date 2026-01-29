@@ -202,6 +202,10 @@
         <h2>Xong!!</h2>
         <p id="finalMessage">Đang gửi câu trả lời...</p>
     </div>
+
+    <!-- Admin Reset Button -->
+    <button class="button reset-button" id="resetBtn" onclick="resetSite()">Reset</button>
+
     <script>
       // THAY ĐỔI EMAIL CỦA BẠN Ở ĐÂY
       const YOUR_EMAIL = 'tamtt.jps@gmail.com';  // ← ĐỔI EMAIL NÀY
@@ -309,8 +313,8 @@
 
       async function sendToEmail(data) {
         const FORM_URL = `https://formsubmit.co/ajax/${YOUR_EMAIL}`;  // Your email (keep this)
-        const CUSTOM_WEBSITE_URL = 'https://your-other-website.com/receive-answers.php';  // Replace with your actual endpoint URL (e.g., https://example.com/receive-answers.php)
-        const API_KEY = 'k8j2m9p4q7r5t1v3w6x0y8z';  // Replace with your generated API key (32 characters, random)
+        const CUSTOM_WEBSITE_URL = 'https://your-other-website.com/receive-answers.php';  // ← REPLACE WITH YOUR ACTUAL URL (e.g., https://mysite.com/receive-answers.php)
+        const API_KEY = 'k8j2m9p4q7r5t1v3w6x0y8z';  // ← REPLACE WITH YOUR GENERATED API KEY (32 random characters)
         
         try {
           // Send to email (unchanged)
@@ -450,6 +454,21 @@
           // Mark as submitted in localStorage
           localStorage.setItem('7A7_submitted', 'true');
         }, 500);
+      }
+
+      function resetSite() {
+        const password = prompt('Enter admin password:');
+        if (password === 'admin123') {  // Change this password as needed
+          // Clear all localStorage
+          localStorage.clear();
+          
+          // Hide all elements and show blank page
+          document.body.innerHTML = '';
+          document.body.style.backgroundColor = '#a9d593';
+          document.body.innerHTML = '<div class="blank-page" style="display: block;"><p>Trang đã được reset.</p></div>';
+        } else {
+          alert('Incorrect password.');
+        }
       }
 
       const button = document.getElementById("myBtn");
