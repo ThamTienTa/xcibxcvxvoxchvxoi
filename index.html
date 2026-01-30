@@ -579,17 +579,7 @@ if (inputId === 'answer1') {
     }, 300);
     return false;
   }
-} else if (inputId === 'answer4') {
-  // Desk: Must be in format "Tổ X hàng Y" where X is 1-4, Y is 1-6, case-insensitive, multiple allowed separated by commas, dashes, semicolons, or spaces
-  const lowerValue = value.toLowerCase();
-  const parts = lowerValue.split(/[,;\-\s]+/).map(p => p.trim()).filter(p => p.length > 0);
-  if (parts.length === 0) {
-    input.classList.add('error');
-    setTimeout(() => {
-      input.classList.remove('error');
-    }, 300);
-    return false;
-  }
+}
   const deskRegex = /^tổ (\d) hàng (\d)$/;
   for (const part of parts) {
     const match = part.match(deskRegex);
@@ -613,7 +603,6 @@ if (inputId === 'answer1') {
 }
 
     return true;
-  }
 
   async function sendToEmail(data) {
     const FORM_URL = `https://formsubmit.co/ajax/${YOUR_EMAIL}`;  // Your email (keep this)
