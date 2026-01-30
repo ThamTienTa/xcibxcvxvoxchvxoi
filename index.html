@@ -924,7 +924,7 @@ async function submitAnswers() {
       localStorage.setItem('7A7_submitted', 'true');  // Mark as submitted
       setTimeout(() => {
         hideAllElements();
-        document.getElementById('waitingApproval').style.display = 'block';  // Show waiting message
+        document.getElementById('waitingApproval').style.display = 'block';  // Show waiting message (add this div to HTML)
       }, 2000);
     } else {
       finalMessage.innerHTML = 'Câu trả lời đã được lưu!<br><small>Sẽ gửi khi có internet. Hãy chờ admin xác minh!</small>';
@@ -935,8 +935,7 @@ async function submitAnswers() {
       }, 2000);
     }
   }, 500);
-}
-          
+}          
       function hideElements() {
         const questionBox = document.getElementById("question1");
         const elements = document.getElementsByClassName("HiddenEl");
