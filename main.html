@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lớp 7A7 - Website</title>
+    <title>Lớp 7A7 - Trung Tâm</title>
     <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -320,10 +320,10 @@
     <div class="container">
         <div class="header">
             <div class="header-badge">
-                <h1>CLASS-7A7</h1>
+                <h1>LỚP HỌC</h1>
             </div>
             <div class="subtitle-badge">
-                <h2>WEBSITE</h2>
+                <h2>TRUNG TÂM</h2>
             </div>
             <div class="class-name">Lớp 7A7</div>
         </div>
@@ -763,15 +763,58 @@
         scheduleBody.innerHTML = html;
       }
 
-      // Online counter (simulated)
-      function updateOnlineCount() {
-        const count = Math.floor(Math.random() * 10) + 15; // Random between 15-24
+      // Real online counter using localStorage
+      const HEARTBEAT_INTERVAL = 5000; // 5 seconds
+      const ONLINE_TIMEOUT = 15000; // 15 seconds - if no heartbeat, consider offline
+      const userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+      function updateHeartbeat() {
+        const now = Date.now();
+        const onlineUsers = JSON.parse(localStorage.getItem('onlineUsers') || '{}');
+        
+        // Add or update current user
+        onlineUsers[userId] = now;
+        
+        // Remove users who haven't sent heartbeat in ONLINE_TIMEOUT
+        Object.keys(onlineUsers).forEach(id => {
+          if (now - onlineUsers[id] > ONLINE_TIMEOUT) {
+            delete onlineUsers[id];
+          }
+        });
+        
+        localStorage.setItem('onlineUsers', JSON.stringify(onlineUsers));
+        updateOnlineDisplay(Object.keys(onlineUsers).length);
+      }
+
+      function updateOnlineDisplay(count) {
         document.getElementById('onlineCount').textContent = count;
       }
 
-      // Update online count every 30 seconds
-      setInterval(updateOnlineCount, 30000);
-      updateOnlineCount(); // Initial call
+      // Listen for localStorage changes from other tabs
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'onlineUsers') {
+          const onlineUsers = JSON.parse(e.newValue || '{}');
+          const now = Date.now();
+          
+          // Filter out expired users
+          const activeUsers = Object.keys(onlineUsers).filter(id => {
+            return now - onlineUsers[id] <= ONLINE_TIMEOUT;
+          });
+          
+          updateOnlineDisplay(activeUsers.length);
+        }
+      });
+
+      // Send heartbeat regularly
+      setInterval(updateHeartbeat, HEARTBEAT_INTERVAL);
+      updateHeartbeat(); // Initial call
+
+      // Remove user when leaving
+      window.addEventListener('beforeunload', function() {
+        const onlineUsers = JSON.parse(localStorage.getItem('onlineUsers') || '{}');
+        delete onlineUsers[userId];
+        localStorage.setItem('onlineUsers', JSON.stringify(onlineUsers));
+      });
 
       // Close modal with Escape key
       document.addEventListener('keydown', function(event) {
