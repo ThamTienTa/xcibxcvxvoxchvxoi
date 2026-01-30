@@ -1,1 +1,1100 @@
+<!DOCTYPE html>
+<html lang="vn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lớp 7A7</title>
+    <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+      body {
+          font-family: Arial, sans-serif;
+          background: #a9d593;
+          color: #333;
+          text-align: center;
+          padding: 50px;
+          min-height: 100vh;
+      }
+
+      .button {
+          background-color: #498e4c;
+          color: white;
+          padding: 15px 32px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 16px;
+          margin: 10px;
+          cursor: pointer;
+          border: 2px solid #000000;
+          border-radius: 15px;
+          font-family: 'Times New Roman', Times, serif;
+          font-size: 20px;
+      }
+
+      .button:hover {
+          background-color: #3b7d3c;
+      }
+
+      .fade-out {
+          animation: fadeOut 0.5s ease-out forwards !important;
+      }
+
+      .fade-in {
+          animation: fadeIn 0.5s ease-out forwards !important;
+      }
+
+      @keyframes fadeOut {
+          from {
+              opacity: 1;
+          }
+          to {
+              opacity: 0;
+          }
+      }
+
+      @keyframes fadeIn {
+          from {
+              opacity: 0;
+          }
+          to {
+              opacity: 1;
+          }
+      }
+
+      .question-container {
+          display: none;
+          position: fixed;
+          bottom: 50%;
+          left: 50%;
+          transform: translate(-50%, 50%);
+          background-color: white;
+          padding: 30px;
+          border-radius: 15px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          max-width: 500px;
+          width: 80%;
+          opacity: 0;
+      }
+
+      .question-container h2 {
+          color: #498e4c;
+          margin-bottom: 20px;
+      }
+
+      .question-container input {
+          width: 100%;
+          padding: 10px;
+          margin: 10px 0;
+          border: 2px solid #498e4c;
+          border-radius: 15px;
+          font-size: 16px;
+          box-sizing: border-box;
+      }
+
+      .question-container input.error {
+          border-color: #d32f2f;
+          animation: shake 0.3s;
+      }
+
+      @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-10px); }
+          75% { transform: translateX(10px); }
+      }
+
+      .hidden {
+          display: none !important;
+      }
+
+      .already-submitted {
+          display: none;
+          position: fixed;
+          bottom: 50%;
+          left: 50%;
+          transform: translate(-50%, 50%);
+          background-color: white;
+          padding: 30px;
+          border-radius: 15px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          max-width: 500px;
+          width: 80%;
+          text-align: center;
+      }
+
+      .already-submitted h2 {
+          color: #498e4c;
+          margin-bottom: 20px;
+      }
+
+      .blank-page {
+          display: none;
+          text-align: center;
+          padding: 50px;
+      }
+
+      /* NEW CLASS HUB STYLES */
+      .class-hub-new {
+          font-family: 'Nunito', sans-serif;
+          background: #a9d593;
+          min-height: 100vh;
+          padding: 40px 20px;
+          display: none;
+      }
+
+      .class-hub-new .container {
+          max-width: 1200px;
+          margin: 0 auto;
+      }
+
+      .class-hub-new .header {
+          text-align: left;
+          margin-bottom: 60px;
+      }
+
+      .class-hub-new .header-badge {
+          display: inline-block;
+          background: linear-gradient(135deg, #FFE066 0%, #FFD147 100%);
+          padding: 20px 60px;
+          border-radius: 50px;
+          transform: rotate(-2deg);
+          box-shadow: 
+              0 8px 16px rgba(0, 0, 0, 0.15),
+              inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+          margin-bottom: 20px;
+          border: 4px solid #333;
+      }
+
+      .class-hub-new .header-badge h1 {
+          font-family: 'Chewy', cursive;
+          font-size: 72px;
+          color: #FF6B6B;
+          text-shadow: 
+              3px 3px 0px #333,
+              -1px -1px 0px #fff;
+          letter-spacing: 4px;
+          margin: 0;
+      }
+
+      .class-hub-new .subtitle-badge {
+          display: inline-block;
+          background: #FFF8E1;
+          padding: 15px 40px;
+          border-radius: 40px;
+          border: 3px solid #333;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .class-hub-new .subtitle-badge h2 {
+          font-family: 'Chewy', cursive;
+          font-size: 42px;
+          color: #FF6B6B;
+          text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+          margin: 0;
+      }
+
+      .class-hub-new .class-name {
+          font-size: 56px;
+          font-weight: 800;
+          color: #2d3436;
+          margin-top: 30px;
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .class-hub-new .grid-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 30px;
+          margin-top: 40px;
+      }
+
+      .class-hub-new .grid-item {
+          background: white;
+          border: 4px solid #333;
+          border-radius: 20px;
+          padding: 30px 25px;
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          box-shadow: 
+              0 6px 0 #333,
+              0 8px 12px rgba(0, 0, 0, 0.15);
+          position: relative;
+      }
+
+      .class-hub-new .grid-item:hover {
+          transform: translateY(-8px);
+          box-shadow: 
+              0 10px 0 #333,
+              0 12px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .class-hub-new .grid-item:active {
+          transform: translateY(-2px);
+          box-shadow: 
+              0 4px 0 #333,
+              0 6px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .class-hub-new .icon-box {
+          width: 70px;
+          height: 70px;
+          border-radius: 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 36px;
+          border: 3px solid #333;
+          flex-shrink: 0;
+          box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.1);
+      }
+
+      .class-hub-new .grid-item:nth-child(1) .icon-box { background: #87CEEB; }
+      .class-hub-new .grid-item:nth-child(2) .icon-box { background: #DDA0DD; }
+      .class-hub-new .grid-item:nth-child(3) .icon-box { background: #FFB6C1; }
+      .class-hub-new .grid-item:nth-child(4) .icon-box { background: #FFB347; }
+      .class-hub-new .grid-item:nth-child(5) .icon-box { background: #B19CD9; }
+      .class-hub-new .grid-item:nth-child(6) .icon-box { background: #FFB6D9; }
+      .class-hub-new .grid-item:nth-child(7) .icon-box { background: #FF9966; }
+      .class-hub-new .grid-item:nth-child(8) .icon-box { background: #87CEEB; }
+
+      .class-hub-new .grid-text {
+          flex: 1;
+          text-align: left;
+      }
+
+      .class-hub-new .grid-text h3 {
+          font-size: 22px;
+          font-weight: 800;
+          color: #2d3436;
+          line-height: 1.3;
+          margin: 0;
+      }
+
+      /* Modal styles */
+      .modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.6);
+          z-index: 1000;
+          align-items: center;
+          justify-content: center;
+          animation: fadeIn 0.3s;
+      }
+
+      .modal.active {
+          display: flex;
+      }
+
+      .modal-content {
+          background: white;
+          border: 4px solid #333;
+          border-radius: 25px;
+          padding: 40px;
+          max-width: 800px;
+          width: 90%;
+          max-height: 80vh;
+          overflow-y: auto;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+          animation: slideUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      }
+
+      .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 30px;
+          padding-bottom: 20px;
+          border-bottom: 3px solid #333;
+      }
+
+      .modal-header h2 {
+          font-family: 'Chewy', cursive;
+          font-size: 36px;
+          color: #FF6B6B;
+          margin: 0;
+      }
+
+      .close-btn {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: #FF6B6B;
+          border: 3px solid #333;
+          color: white;
+          font-size: 24px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          transition: all 0.2s;
+      }
+
+      .close-btn:hover {
+          transform: rotate(90deg);
+          background: #FF5252;
+      }
+
+      .modal-body {
+          font-size: 18px;
+          line-height: 1.8;
+          color: #2d3436;
+          text-align: left;
+      }
+
+      .modal-body h3 {
+          font-size: 24px;
+          margin: 20px 0 10px 0;
+          color: #FF6B6B;
+      }
+
+      .modal-body h4 {
+          font-size: 20px;
+          margin: 15px 0 8px 0;
+          color: #498e4c;
+      }
+
+      .modal-body ul {
+          margin-left: 25px;
+          margin-bottom: 15px;
+      }
+
+      .modal-body li {
+          margin-bottom: 8px;
+      }
+
+      .modal-body .announcement {
+          background-color: #f9f9f9;
+          padding: 15px;
+          margin-bottom: 15px;
+          border-radius: 8px;
+          border-left: 4px solid #498e4c;
+      }
+
+      @keyframes slideUp {
+          from { 
+              opacity: 0;
+              transform: translateY(50px) scale(0.9);
+          }
+          to { 
+              opacity: 1;
+              transform: translateY(0) scale(1);
+          }
+      }
+
+      @media (max-width: 768px) {
+          .class-hub-new .header-badge h1 {
+              font-size: 48px;
+          }
+          
+          .class-hub-new .subtitle-badge h2 {
+              font-size: 32px;
+          }
+          
+          .class-hub-new .class-name {
+              font-size: 40px;
+          }
+
+          .class-hub-new .grid-container {
+              grid-template-columns: 1fr;
+          }
+      }
+    </style>
+</head>
+<body>
+    <h1 class="HiddenEl">Chào mừng đến với lớp 7A7!</h1>
+    <p class="HiddenEl">Để có thể vào nhóm lớp thì website xin phép hỏi một chút câu hỏi!</p>
+    <button id="myBtn" class="button HiddenEl">Ok</button>
+    <h6 class="HiddenEl">(Không phải thành viên lớp thì cút)</h6>
+
+    <!-- Already Submitted Message -->
+    <div class="already-submitted" id="alreadySubmitted">
+        <h2>Đã gửi câu trả lời!</h2>
+        <p>Hãy chờ 1-2 ngày để xác minh thành viên!</p>
+    </div>
+
+    <!-- Blank Page for Reset -->
+    <div class="blank-page" id="blankPage">
+        <p>Trang đã được reset.</p>
+    </div>
+
+    <!-- Question 1: Personal -->
+    <div class="question-container" id="question1">
+        <h2>Câu hỏi 1</h2>
+        <p>Bạn tên là gì?</p>
+        <input type="text" id="answer1" placeholder="Đầy đủ họ tên">
+        <button class="button" onclick="nextQuestion(1)">Tiếp tục</button>
+    </div>
+
+    <!-- Question 2: Personal -->
+    <div class="question-container" id="question2">
+        <h2>Câu hỏi 2</h2>
+        <p>Ngày tháng năm sinh?</p>
+        <input type="text" id="answer2" placeholder="Đầy đủ ngày tháng...">
+        <button class="button" onclick="nextQuestion(2)">Tiếp tục</button>
+    </div>
+
+    <!-- Identity Confirmation -->
+    <div class="question-container" id="identity">
+        <h2>Xác nhận danh tính</h2>
+        <p>Ok, giờ đã lấy được sơ qua thông tin cá nhân.</p>
+        <p>Bây giờ hãy trả lời 2 câu hỏi về lớp 7A7 nhé!</p>
+        <button class="button" onclick="nextQuestion(3)">Tiếp tục</button>
+    </div>
+
+    <!-- Question 3: About Class -->
+    <div class="question-container" id="question3">
+        <h2>Câu hỏi 3</h2>
+        <p>Lớp 7A7 có bao nhiêu học sinh?</p>
+        <input type="text" id="answer3" placeholder="Nhập câu trả lời...">
+        <button class="button" onclick="nextQuestion(4)">Tiếp tục</button>
+    </div>
+
+    <!-- Question 4: About Class -->
+    <div class="question-container" id="question4">
+        <h2>Câu hỏi 4</h2>
+        <p>Bạn ngồi ở bàn nào?</p>
+        <input type="text" id="answer4" placeholder="Tổ, hàng...(vd: Tổ 4, hàng 36)">
+        <button class="button" onclick="submitAnswers()">Hoàn thành</button>
+    </div>
+
+    <!-- Final Message -->
+    <div class="question-container" id="final">
+        <h2>Xong!!</h2>
+        <p id="finalMessage">Đang gửi câu trả lời...</p>
+    </div>
+
+    <!-- NEW CLASS HUB -->
+    <div class="class-hub-new" id="classHubNew">
+        <div class="container">
+            <div class="header">
+                <div class="header-badge">
+                    <h1>LỚP HỌC</h1>
+                </div>
+                <div class="subtitle-badge">
+                    <h2>TRUNG TÂM</h2>
+                </div>
+                <div class="class-name">Lớp 7A7</div>
+            </div>
+
+            <div class="grid-container">
+                <div class="grid-item" onclick="openModal('nhom-chat')">
+                    <div class="icon-box">💬</div>
+                    <div class="grid-text">
+                        <h3>Nhóm<br>Chat</h3>
+                    </div>
+                </div>
+
+                <div class="grid-item" onclick="openModal('tin-tuc')">
+                    <div class="icon-box">📝</div>
+                    <div class="grid-text">
+                        <h3>Tin tức lớp<br>học</h3>
+                    </div>
+                </div>
+
+                <div class="grid-item" onclick="openModal('hoi-bai')">
+                    <div class="icon-box">❓</div>
+                    <div class="grid-text">
+                        <h3>Hỏi<br>Bài</h3>
+                    </div>
+                </div>
+
+                <div class="grid-item" onclick="openModal('hoc-tap')">
+                    <div class="icon-box">📚</div>
+                    <div class="grid-text">
+                        <h3>Học<br>Tập</h3>
+                    </div>
+                </div>
+
+                <div class="grid-item" onclick="openModal('lich-hoc')">
+                    <div class="icon-box">📅</div>
+                    <div class="grid-text">
+                        <h3>Lịch lớp<br>học</h3>
+                    </div>
+                </div>
+
+                <div class="grid-item" onclick="openModal('pomodoro')">
+                    <div class="icon-box">⏱️</div>
+                    <div class="grid-text">
+                        <h3>Pomodoro<br>Timer</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Online Users Counter -->
+            <div style="text-align: center; margin-top: 30px; background: white; border: 4px solid #333; border-radius: 20px; padding: 20px; box-shadow: 0 6px 0 #333;">
+                <h3 style="color: #498e4c; margin: 0 0 10px 0; font-size: 24px;">👥 Đang online</h3>
+                <p style="font-size: 48px; font-weight: 800; color: #FF6B6B; margin: 0;" id="onlineCount">0</p>
+                <p style="margin: 10px 0 0 0; color: #666;">người đang truy cập</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Nhóm Chat Modal -->
+    <div id="modal-nhom-chat" class="modal" onclick="closeModal(event, 'nhom-chat')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>💬 Nhóm Chat</h2>
+                <button class="close-btn" onclick="closeModal(event, 'nhom-chat')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>Chat với bạn bè trong lớp</h3>
+                <div class="chat-messages" id="chatMessages" style="max-height: 400px; overflow-y: auto; border: 2px solid #498e4c; padding: 15px; margin-bottom: 15px; background-color: #f9f9f9; border-radius: 10px;">
+                    <div class="message" style="margin-bottom: 10px; padding: 10px; background-color: white; border-radius: 8px;">
+                        <strong>Admin:</strong> Chào mừng các bạn đến với nhóm chat lớp 7A7! 🎉
+                    </div>
+                </div>
+                <div class="chat-input" style="display: flex; gap: 10px;">
+                    <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." style="flex: 1; padding: 12px; border: 2px solid #498e4c; border-radius: 10px; font-size: 16px;">
+                    <button onclick="sendChatMessage()" style="padding: 12px 24px; background-color: #498e4c; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">Gửi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tin tức Modal -->
+    <div id="modal-tin-tuc" class="modal" onclick="closeModal(event, 'tin-tuc')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>📝 Tin tức lớp học</h2>
+                <button class="close-btn" onclick="closeModal(event, 'tin-tuc')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>Thông báo mới nhất</h3>
+                <div class="announcement">
+                    <h4>📅 Thông báo lịch thi</h4>
+                    <p>Kỳ thi giữa học kì 2 sẽ diễn ra vào tuần sau. Hãy ôn tập kỹ!</p>
+                    <small>Đăng ngày: 30/01/2026</small>
+                </div>
+                <div class="announcement">
+                    <h4>🏆 Cuộc thi toán học</h4>
+                    <p>Lớp 7A7 sẽ tham gia cuộc thi toán học cấp trường. Ai muốn tham gia đăng ký nhé!</p>
+                    <small>Đăng ngày: 25/01/2026</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hỏi Bài Modal -->
+    <div id="modal-hoi-bai" class="modal" onclick="closeModal(event, 'hoi-bai')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>❓ Hỏi Bài</h2>
+                <button class="close-btn" onclick="closeModal(event, 'hoi-bai')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>Đặt câu hỏi về bài học</h3>
+                <p>Nếu có bài nào không hiểu, hãy hỏi ở đây nhé! 📚</p>
+                <div class="homework-questions" style="max-height: 350px; overflow-y: auto; margin-bottom: 20px;">
+                    <div class="question" style="background-color: #f9f9f9; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #498e4c;">
+                        <strong>Minh:</strong> Ai có bài giải bài tập Toán trang 45 không?
+                    </div>
+                    <div class="question" style="background-color: #f9f9f9; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #498e4c;">
+                        <strong>Lan:</strong> Thầy cô giao bài tập gì hôm nay vậy các bạn?
+                    </div>
+                </div>
+                <div class="ask-question" style="display: flex; gap: 10px;">
+                    <input type="text" id="questionInput" placeholder="Hỏi câu gì đó..." style="flex: 1; padding: 12px; border: 2px solid #498e4c; border-radius: 10px; font-size: 16px;">
+                    <button onclick="askQuestion()" style="padding: 12px 24px; background-color: #498e4c; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">Hỏi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Học Tập Modal -->
+    <div id="modal-hoc-tap" class="modal" onclick="closeModal(event, 'hoc-tap')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>📚 Học Tập</h2>
+                <button class="close-btn" onclick="closeModal(event, 'hoc-tap')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>Tài liệu học tập</h3>
+                <ul>
+                    <li>📖 Sách giáo khoa Toán 7</li>
+                    <li>📖 Sách giáo khoa Ngữ văn 7</li>
+                    <li>📖 Sách giáo khoa Khoa học 7</li>
+                    <li>📖 Sách giáo khoa Lịch sử 7</li>
+                    <li>📖 Sách giáo khoa Địa lý 7</li>
+                </ul>
+                <h3>Video bài giảng</h3>
+                <ul>
+                    <li>🎥 Toán 7 - Chương 1</li>
+                    <li>🎥 Ngữ văn 7 - Văn học Việt Nam</li>
+                    <li>🎥 Khoa học 7 - Vật lý cơ bản</li>
+                </ul>
+                <h3>Đề thi và bài tập</h3>
+                <ul>
+                    <li>📝 Đề thi giữa kỳ các môn</li>
+                    <li>📝 Bài tập ôn tập</li>
+                    <li>📝 Đề thi học kỳ năm trước</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lịch học Modal -->
+    <div id="modal-lich-hoc" class="modal" onclick="closeModal(event, 'lich-hoc')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>📅 Lịch lớp học</h2>
+                <button class="close-btn" onclick="closeModal(event, 'lich-hoc')">×</button>
+            </div>
+            <div class="modal-body" id="full-schedule-body">
+                <!-- Generated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Pomodoro Modal -->
+    <div id="modal-pomodoro" class="modal" onclick="closeModal(event, 'pomodoro')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>⏱️ Pomodoro Timer</h2>
+                <button class="close-btn" onclick="closeModal(event, 'pomodoro')">×</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <h3>Kỹ thuật Pomodoro</h3>
+                <p>Học 25 phút, nghỉ 5 phút! 🍅</p>
+                <div id="timer-display" style="font-size: 72px; font-weight: 800; color: #FF6B6B; margin: 30px 0;">25:00</div>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="startPomodoro()" style="padding: 15px 30px; background-color: #498e4c; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold;">▶ Bắt đầu</button>
+                    <button onclick="pausePomodoro()" style="padding: 15px 30px; background-color: #FF9800; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold;">⏸ Tạm dừng</button>
+                    <button onclick="resetPomodoro()" style="padding: 15px 30px; background-color: #FF6B6B; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold;">↺ Đặt lại</button>
+                </div>
+                <div id="pomodoro-status" style="margin-top: 20px; font-size: 18px; color: #666;">Sẵn sàng bắt đầu!</div>
+                <div style="margin-top: 30px; text-align: left; background: #f9f9f9; padding: 20px; border-radius: 10px;">
+                    <h4 style="color: #498e4c; margin-top: 0;">Cách sử dụng:</h4>
+                    <ol style="line-height: 1.8;">
+                        <li>Chọn một nhiệm vụ học tập</li>
+                        <li>Bấm "Bắt đầu" và tập trung học 25 phút</li>
+                        <li>Khi hết giờ, nghỉ ngơi 5 phút</li>
+                        <li>Sau 4 chu kỳ, nghỉ dài 15-30 phút</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+      // THAY ĐỔI EMAIL CỦA BẠN Ở ĐÂY
+      const YOUR_EMAIL = 'tamtt.jps@gmail.com';
+      const FORM_URL = `https://formsubmit.co/ajax/${YOUR_EMAIL}`;
+      
+      const answers = {};
+
+// Check if already submitted or working status on page load
+window.addEventListener('load', function() {
+  const status = localStorage.getItem('7A7_status');
+  const submitted = localStorage.getItem('7A7_submitted');
+  if (status === 'working') {
+    // Show new class hub
+    hideAllElements();
+    document.getElementById('classHubNew').style.display = 'block';
+    document.body.style.padding = '0';
+  } else if (submitted) {
+    // Show waiting message if submitted but not yet approved
+    hideAllElements();
+    document.getElementById('waitingApproval').style.display = 'block';
+  } else {
+    // Setup OK button for new users - ensure HiddenEl elements are visible
+    const hiddenEls = document.getElementsByClassName('HiddenEl');
+    for (let el of hiddenEls) {
+      el.style.display = 'block';
+    }
+    const button = document.getElementById("myBtn");
+    if (button) {
+      button.addEventListener("click", hideElements);
+    }
+  }
+});
+
+      function hideAllElements() {
+        const hiddenEls = document.getElementsByClassName('HiddenEl');
+        for (let el of hiddenEls) {
+          el.style.display = 'none';
+        }
+        document.querySelectorAll('.question-container, .already-submitted, .blank-page').forEach(el => {
+          el.style.display = 'none';
+        });
+      }
+
+      // Enter key listener
+      document.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+          if (!document.getElementById('question1').classList.contains('hidden')) {
+            nextQuestion(1);
+          } else if (!document.getElementById('question2').classList.contains('hidden')) {
+            nextQuestion(2);
+          } else if (!document.getElementById('identity').classList.contains('hidden')) {
+            nextQuestion(3);
+          } else if (!document.getElementById('question3').classList.contains('hidden')) {
+            nextQuestion(4);
+          } else if (!document.getElementById('question4').classList.contains('hidden')) {
+            submitAnswers();
+          }
+        }
+      });
+
+      function focusInput(inputId) {
+        setTimeout(() => {
+          const input = document.getElementById(inputId);
+          if (input) {
+            input.focus();
+          }
+        }, 600);
+      }
+
+      function validateInput(inputId) {
+        const input = document.getElementById(inputId);
+        const value = input.value.trim();
+        
+        if (!value) {
+          input.classList.add('error');
+          setTimeout(() => {
+            input.classList.remove('error');
+          }, 300);
+          return false;
+        }
+
+        if (inputId === 'answer1') {
+          const words = value.split(/\s+/);
+          if (words.length < 2 || words.some(word => word.length < 2)) {
+            input.classList.add('error');
+            setTimeout(() => {
+              input.classList.remove('error');
+            }, 300);
+            return false;
+          }
+        } else if (inputId === 'answer2') {
+          const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+          const match = value.match(dateRegex);
+          if (!match) {
+            input.classList.add('error');
+            setTimeout(() => {
+              input.classList.remove('error');
+            }, 300);
+            return false;
+          }
+          const day = parseInt(match[1], 10);
+          const month = parseInt(match[2], 10);
+          const year = parseInt(match[3], 10);
+          const date = new Date(year, month - 1, day);
+          if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day || (year !== 2012 && year !== 2013 && year !== 2014)) {
+            input.classList.add('error');
+            setTimeout(() => {
+              input.classList.remove('error');
+            }, 300);
+            return false;
+          }
+        } else if (inputId === 'answer4') {
+          // Just check if it's not empty, no strict validation
+          // This allows any format like "Tổ 3 hàng 3", "to 3 hang 3", etc.
+          if (value.length < 3) {
+            input.classList.add('error');
+            setTimeout(() => {
+              input.classList.remove('error');
+            }, 300);
+            return false;
+          }
+        }
+
+        return true;
+      }
+
+      async function sendToEmail(data) {
+        try {
+          const emailResponse = await fetch(FORM_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              '📝 Tên': data.name,
+              '🎂 Ngày sinh': data.birthday,
+              '👥 Số học sinh lớp 7A7': data.studentCount,
+              '💺 Số bàn': data.deskNumber,
+              '⏰ Thời gian': new Date().toLocaleString('vi-VN')
+            })
+          });
+          
+          console.log('Email sent:', emailResponse.ok);
+          return emailResponse.ok;
+        } catch (error) {
+          console.error('Error sending:', error);
+          localStorage.setItem('7A7_pending_' + Date.now(), JSON.stringify(data));
+          return false;
+        }
+      }
+
+      function nextQuestion(step) {
+        let currentBox, nextBox, nextInputId, currentInputId;
+
+        if (step === 1) {
+          currentInputId = 'answer1';
+          if (!validateInput(currentInputId)) return;
+          
+          answers.name = document.getElementById(currentInputId).value.trim();
+          
+          currentBox = document.getElementById('question1');
+          nextBox = document.getElementById('question2');
+          nextInputId = 'answer2';
+        } 
+        else if (step === 2) {
+          currentInputId = 'answer2';
+          if (!validateInput(currentInputId)) return;
+          
+          answers.birthday = document.getElementById(currentInputId).value.trim();
+          
+          currentBox = document.getElementById('question2');
+          nextBox = document.getElementById('identity');
+          nextInputId = null;
+        }
+        else if (step === 3) {
+          currentBox = document.getElementById('identity');
+          nextBox = document.getElementById('question3');
+          nextInputId = 'answer3';
+        }
+        else if (step === 4) {
+          currentInputId = 'answer3';
+          if (!validateInput(currentInputId)) return;
+          
+          answers.studentCount = document.getElementById(currentInputId).value.trim();
+          
+          currentBox = document.getElementById('question3');
+          nextBox = document.getElementById('question4');
+          nextInputId = 'answer4';
+        }
+
+        currentBox.classList.remove('slide-up', 'fade-in');
+        void currentBox.offsetWidth;
+        currentBox.classList.add('fade-out');
+        
+        setTimeout(() => {
+          currentBox.classList.add('hidden');
+          currentBox.classList.remove('fade-out');
+          currentBox.style.opacity = '0';
+          
+          nextBox.classList.remove('hidden');
+          nextBox.style.display = 'block';
+          nextBox.style.opacity = '0';
+          void nextBox.offsetWidth;
+          nextBox.classList.add('fade-in');
+
+          if (nextInputId) {
+            focusInput(nextInputId);
+          }
+        }, 500);
+      }
+
+async function submitAnswers() {
+  const currentInputId = 'answer4';
+  if (!validateInput(currentInputId)) return;
+  
+  answers.deskNumber = document.getElementById(currentInputId).value.trim();
+  
+  const currentBox = document.getElementById('question4');
+  const finalBox = document.getElementById('final');
+  
+  currentBox.classList.remove('fade-in');
+  void currentBox.offsetWidth;
+  currentBox.classList.add('fade-out');
+  
+  setTimeout(async () => {
+    currentBox.classList.add('hidden');
+    currentBox.classList.remove('fade-out');
+    
+    finalBox.classList.remove('hidden');
+    finalBox.style.display = 'block';
+    finalBox.classList.add('fade-in');
+    
+    const success = await sendToEmail(answers);
+    
+    const finalMessage = document.getElementById('finalMessage');
+    if (success) {
+      finalMessage.innerHTML = 'Câu trả lời đã được gửi!<br>Hãy chờ admin xác minh!';
+      localStorage.setItem('7A7_submitted', 'true');  // Mark as submitted
+      setTimeout(() => {
+        hideAllElements();
+        document.getElementById('waitingApproval').style.display = 'block';  // Show waiting message
+      }, 2000);
+    } else {
+      finalMessage.innerHTML = 'Câu trả lời đã được lưu!<br><small>Sẽ gửi khi có internet. Hãy chờ admin xác minh!</small>';
+      localStorage.setItem('7A7_submitted', 'true');  // Mark as submitted even if email fails
+      setTimeout(() => {
+        hideAllElements();
+        document.getElementById('waitingApproval').style.display = 'block';  // Show waiting message
+      }, 2000);
+    }
+  }, 500);
+}
+          
+      function hideElements() {
+        const questionBox = document.getElementById("question1");
+        const elements = document.getElementsByClassName("HiddenEl");
+        for (let i = 0; i < elements.length; i++) {
+          elements[i].classList.add("fade-out");
+        }
+        
+        setTimeout(() => {
+          for (let i = 0; i < elements.length; i++) {
+            elements[i].style.display = "none";
+          }
+          
+          questionBox.classList.remove('hidden');
+          questionBox.style.display = 'block';
+          questionBox.style.opacity = '0';
+          void questionBox.offsetWidth;
+          questionBox.classList.add("fade-in");
+          focusInput('answer1');
+        }, 500);
+      }
+
+      // Schedule data based on the timetable
+      const scheduleData = {
+        2: { // Thứ 2 (Monday)
+          day: 'Thứ 2',
+          morning: [
+            { time: 'Tiết 1', subject: 'NT (Nhạc)' },
+            { time: 'Tiết 2', subject: 'KHTN(Sinh)' },
+            { time: 'Tiết 3', subject: 'Văn' },
+            { time: 'Tiết 4', subject: 'Ngoại Ngữ' }
+          ],
+          afternoon: [
+            { time: 'Tiết 1', subject: 'Công nghệ' },
+            { time: 'Tiết 2', subject: 'KHTN (Lí)' },
+            { time: 'Tiết 3', subject: 'Toán' }
+          ]
+        },
+        3: { // Thứ 3 (Tuesday)
+          day: 'Thứ 3',
+          morning: [
+            { time: 'Tiết 1', subject: 'GDTC' },
+            { time: 'Tiết 2', subject: 'Ngữ văn' },
+            { time: 'Tiết 3', subject: 'GDDP' },
+            { time: 'Tiết 4', subject: 'Toán' }
+          ],
+          afternoon: []
+        },
+        4: { // Thứ 4 (Wednesday)
+          day: 'Thứ 4',
+          morning: [
+            { time: 'Tiết 1', subject: 'Ngữ văn' },
+            { time: 'Tiết 2', subject: 'Toán' },
+            { time: 'Tiết 3', subject: 'KHTN(Sinh)' },
+            { time: 'Tiết 4', subject: 'GDCD' }
+          ],
+          afternoon: [
+            { time: 'Tiết 1', subject: 'HĐTN' },
+            { time: 'Tiết 2', subject: 'Ngoại Ngữ' },
+            { time: 'Tiết 3', subject: 'LS ĐL (Sử)' }
+          ]
+        },
+        5: { // Thứ 5 (Thursday)
+          day: 'Thứ 5',
+          morning: [
+            { time: 'Tiết 1', subject: 'Ngoại Ngữ' },
+            { time: 'Tiết 2', subject: 'LS ĐL (Địa)' },
+            { time: 'Tiết 3', subject: 'GDTC' },
+            { time: 'Tiết 4', subject: 'NT (MT)' }
+          ],
+          afternoon: [
+            { time: 'Tiết 1', subject: 'KHTN(Sinh)' },
+            { time: 'Tiết 2', subject: 'LS ĐL (tùy)' },
+            { time: 'Tiết 3', subject: 'HĐTN' }
+          ]
+        },
+        6: { // Thứ 6 (Friday)
+          day: 'Thứ 6',
+          morning: [
+            { time: 'Tiết 1', subject: 'Tin học' },
+            { time: 'Tiết 2', subject: 'Toán' },
+            { time: 'Tiết 3', subject: 'Ngữ văn' },
+            { time: 'Tiết 4', subject: 'HĐTN' }
+          ],
+          afternoon: []
+        }
+      };
+
+      function generateScheduleContent() {
+        const today = new Date();
+        const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const scheduleBody = document.getElementById('schedule-body');
+        
+        // Check if weekend
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+          scheduleBody.innerHTML = `
+            <h3>🏖️ Hôm nay nghỉ học!</h3>
+            <p>Thứ 7 và Chủ nhật là ngày nghỉ. Hãy thư giãn và chuẩn bị cho tuần học mới nhé!</p>
+            <p><strong>Nhớ làm bài tập về nhà và ôn tập bài cũ!</strong></p>
+          `;
+          return;
+        }
+
+        const schedule = scheduleData[dayOfWeek];
+        if (!schedule) {
+          scheduleBody.innerHTML = '<p>Không có lịch học cho hôm nay.</p>';
+          return;
+        }
+
+        let html = `<h3>Lịch học hôm nay - ${schedule.day}, ${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}</h3>`;
+        
+        if (schedule.morning && schedule.morning.length > 0) {
+          html += '<h4>📚 Buổi sáng:</h4><ul>';
+          schedule.morning.forEach(period => {
+            html += `<li><strong>${period.time}:</strong> ${period.subject}</li>`;
+          });
+          html += '</ul>';
+        }
+
+        if (schedule.afternoon && schedule.afternoon.length > 0) {
+          html += '<h4>🌤️ Buổi chiều:</h4><ul>';
+          schedule.afternoon.forEach(period => {
+            html += `<li><strong>${period.time}:</strong> ${period.subject}</li>`;
+          });
+          html += '</ul>';
+        }
+
+        html += '<p><strong>💡 Lưu ý:</strong> Nhớ mang đầy đủ sách vở và dụng cụ học tập!</p>';
+        
+        scheduleBody.innerHTML = html;
+      }
+
+      // Generate schedule when modal opens
+      function openModal(modalId) {
+        if (modalId === 'chuong-trinh') {
+          generateScheduleContent();
+        }
+        const modal = document.getElementById('modal-' + modalId);
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      // Modal Functions
+      function closeModal(event, modalId) {
+        const modal = document.getElementById('modal-' + modalId);
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          const activeModal = document.querySelector('.modal.active');
+          if (activeModal) {
+            activeModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+          }
+        }
+      });
+    </script>
+</body>
+</html>
 
