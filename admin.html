@@ -180,6 +180,29 @@
 
       // Load answers on page load
       window.addEventListener('load', loadAnswers);
-    </script>
+    // Check for admin access flag on load
+window.addEventListener('load', function() {
+  const hasAccess = localStorage.getItem('7A7_admin_access');
+  if (!hasAccess) {
+    // No flag? Redirect back to main page (direct access blocked)
+    alert('Access denied. Please use the correct path.');
+    window.location.href = 'index.html';  // Redirect to index.html
+    return;
+  }
+  // If flag exists, clear it and proceed to password check
+  localStorage.removeItem('7A7_admin_access');
+  
+  // Now run the password check (existing code)
+  const enteredPassword = prompt('Enter the admin password to access this panel:');
+  if (enteredPassword !== PASSWORD) {
+    alert('Incorrect password. Access denied.');
+    window.location.href = './index.html';
+    return;
+  }
+  // If password is correct, proceed to load answers
+  loadAnswers();
+});
+</script>
 </body>
 </html>
+
