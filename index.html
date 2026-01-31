@@ -413,6 +413,30 @@
     font-size: 24px;
     color: #FFFFFF;
 }
+        /* ... (previous CSS remains the same) ... */
+
+/* Make cells look clickable */
+.board-table td {
+    background: #a9d593;
+    color: #333;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.board-table td:hover {
+    background: #87CEEB; /* Light blue on hover */
+    transform: scale(1.05); /* Slight zoom for interactivity */
+    cursor: pointer;
+}
+
+.board-table td[data-position=""] {
+    background: #f0f0f0; /* Gray out empty cells */
+    cursor: not-allowed;
+}
+
+.board-table td[data-position=""]:hover {
+    background: #f0f0f0; /* No change on hover for empty */
+    transform: none;
+}
     </style>
 </head>
 <body>
@@ -464,13 +488,13 @@
         <button class="button" onclick="nextQuestion(4)">Tiếp tục</button>
     </div>
 
-    <!-- Question 4: About Class -->
-    <div class="question-container" id="question4">
-        <h2>Câu hỏi 4</h2>
-        <p>Bạn ngồi ở bàn nào?</p>
-        <input type="text" id="answer4" placeholder="Tổ, hàng...(vd: Tổ 4, hàng 36)">
-        <button class="button" onclick="submitAnswers()">Hoàn thành</button>
-    </div>
+<!-- Question 4: About Class -->
+<div class="question-container" id="question4">
+    <h2>Câu hỏi 4</h2>
+    <p>Bạn ngồi ở bàn nào?</p>
+    <input type="text" id="answer4" placeholder="Tổ, hàng...(vd: Tổ 4, hàng 36)">
+    <button class="button" onclick="submitAnswers()">Hoàn thành</button>
+</div>
 
     <!-- Final Message -->
     <div class="question-container" id="final">
@@ -489,16 +513,149 @@
     <h1>Still working on</h1>
     <p>Please check back later.</p>
 </div>
-<think>
-First, the user said: "no i just need the script part"
-
-</think>```javascript
+    <!-- Seating Board (Hidden by default, show during question 4) -->
+<div id="seatingBoard" class="seating-board" style="display: none;">
+    <h3>Sơ đồ chỗ ngồi lớp 7A7</h3>
+    <p>Nhấp vào chỗ ngồi của bạn để tiếp tục!</p>
+    <table class="board-table" id="boardTable">
+        <thead>
+            <tr>
+                <th>Tổ 1</th>
+                <th>Tổ 2</th>
+                <th>Tổ 3</th>
+                <th>Tổ 4</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-row="1">
+                <td data-position="Tổ 1, hàng 1">Đặng Thái Sơn / Phạm Phúc Hưng</td>
+                <td data-position="Tổ 2, hàng 1">Nông Trà My / Trương Minh Bảo</td>
+                <td data-position="Tổ 3, hàng 1">Phạm Ngọc Bích / Trương Yến Nhi</td>
+                <td data-position="Tổ 4, hàng 1">Thân Tâm Như / Đỗ Phan Gia Bảo</td>
+            </tr>
+            <tr data-row="2">
+                <td data-position="Tổ 1, hàng 2">Phạm Thu Quỳnh / Nguyễn Duy Khang</td>
+                <td data-position="Tổ 2, hàng 2">Nguyễn Văn Trọng</td>
+                <td data-position="Tổ 3, hàng 2">Nguyễn Bùi Hải Đăng / Trần Như Ý</td>
+                <td data-position="Tổ 4, hàng 2">Nguyễn Ngọc Hạo / Đàm Hà Trang</td>
+            </tr>
+            <tr data-row="3">
+                <td data-position="Tổ 1, hàng 3">Tạ Thiên Tâm</td>
+                <td data-position="Tổ 2, hàng 3">Nguyễn Thị Quỳnh Chi / Hà Thị Thu Huệ</td>
+                <td data-position="Tổ 3, hàng 3">Nguyễn Đăng Phú / Nông Triệu Minh Thúy</td>
+                <td data-position="Tổ 4, hàng 3">Nguyễn Phúc Nhu / Dương Mộc Kỳ</td>
+            </tr>
+            <tr data-row="4">
+                <td data-position="Tổ 1, hàng 4">Lương Diệu Linh / Nguyễn Diệu Linh</td>
+                <td data-position="Tổ 2, hàng 4">Hà Thị Ngọc Nhi / Tạ Hoàng Đức Anh</td>
+                <td data-position="Tổ 3, hàng 4">Nguyễn Bắc Đình Đô / Nguyễn Hoài An</td>
+                <td data-position="Tổ 4, hàng 4">Đỗ Công Bắc / Vũ Thị Minh Ngọc</td>
+            </tr>
+            <tr data-row="5">
+                <td data-position="Tổ 1, hàng 5">Hà Duy Phong</td>
+                <td data-position="Tổ 2, hàng 5">Lý Ngọc Diệp / Lê Quý Trọng</td>
+                <td data-position="Tổ 3, hàng 5">Hà Gia Hân / Nông Vân Tùng</td>
+                <td data-position="Tổ 4, hàng 5">Đỗ Triệu Anh Nguyệt</td>
+            </tr>
+            <tr data-row="6">
+                <td data-position=""></td> <!-- Empty -->
+                <td data-position=""></td> <!-- Empty -->
+                <td data-position="Tổ 3, hàng 6">Cậu vàng</td>
+                <td data-position="Tổ 4, hàng 6">Phạm Bảo An</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 <script>
   // THAY ĐỔI EMAIL CỦA BẠN Ở ĐÂY
   const YOUR_EMAIL = 'tamtt.jps@gmail.com';  // ← ĐỔI EMAIL NÀY (e.g., 'yourrealemail@example.com')
   const FORM_URL = `https://formsubmit.co/ajax/${YOUR_EMAIL}`;
   
   const answers = {};
+
+  // Allowed names for question 1
+  const allowedNames = [
+    "Nguyễn Hoài An",
+    "Phạm Bảo An",
+    "Đỗ Bảo Anh",
+    "Tạ Hoàng Đức Anh",
+    "Đỗ Phan Gia Bảo",
+    "Trương Minh Bảo",
+    "Đỗ Công Bắc",
+    "Phạm Ngọc Bích",
+    "Nguyễn Thị Quỳnh Chi",
+    "Lý Ngọc Diệp",
+    "Nguyễn Bùi Hải Đăng",
+    "Nguyễn Bắc Đình Đô",
+    "Hà Gia Hân",
+    "Nguyễn Ngọc Hạo",
+    "Hà Thị Thu Huệ",
+    "Nguyễn Trung Phúc Hưng",
+    "Phạm Phúc Hưng",
+    "Nguyễn Duy Khang",
+    "Dương Mộc Kỳ",
+    "Lương Diệu Linh",
+    "Nguyễn Diệu Linh",
+    "Nông Trà My",
+    "Vũ Thị Minh Ngọc",
+    "Đỗ Triệu Anh Nguyệt",
+    "Hà Thị Ngọc Nhi",
+    "Trương Yến Nhi",
+    "Nguyễn Phúc Nhu",
+    "Thân Tâm Như",
+    "Hà Duy Phong",
+    "Nguyễn Đăng Phú",
+    "Phạm Thu Quỳnh",
+    "Đặng Thái Sơn",
+    "Tạ Thiên Tâm",
+    "Nông Triệu Minh Thúy",
+    "Đàm Hà Trang",
+    "Lê Quý Trọng",
+    "Nguyễn Văn Trọng",
+    "Nông Vân Tùng",
+    "Trần Như Ý"
+  ];
+
+  // Name to position mapping for question 4 (kept for reference, but not used in validation)
+  const nameToPosition = {
+    "Đặng Thái Sơn": "Tổ 1, hàng 1",
+    "Phạm Phúc Hưng": "Tổ 1, hàng 1",
+    "Nông Trà My": "Tổ 2, hàng 1",
+    "Trương Minh Bảo": "Tổ 2, hàng 1",
+    "Phạm Ngọc Bích": "Tổ 3, hàng 1",
+    "Trương Yến Nhi": "Tổ 3, hàng 1",
+    "Thân Tâm Như": "Tổ 4, hàng 1",
+    "Đỗ Phan Gia Bảo": "Tổ 4, hàng 1",
+    "Phạm Thu Quỳnh": "Tổ 1, hàng 2",
+    "Nguyễn Duy Khang": "Tổ 1, hàng 2",
+    "Nguyễn Văn Trọng": "Tổ 2, hàng 2",
+    "Nguyễn Bùi Hải Đăng": "Tổ 3, hàng 2",
+    "Trần Như Ý": "Tổ 3, hàng 2",
+    "Nguyễn Ngọc Hạo": "Tổ 4, hàng 2",
+    "Đàm Hà Trang": "Tổ 4, hàng 2",
+    "Tạ Thiên Tâm": "Tổ 1, hàng 3",
+    "Nguyễn Thị Quỳnh Chi": "Tổ 2, hàng 3",
+    "Hà Thị Thu Huệ": "Tổ 2, hàng 3",
+    "Nguyễn Đăng Phú": "Tổ 3, hàng 3",
+    "Nông Triệu Minh Thúy": "Tổ 3, hàng 3",
+    "Nguyễn Phúc Nhu": "Tổ 4, hàng 3",
+    "Dương Mộc Kỳ": "Tổ 4, hàng 3",
+    "Lương Diệu Linh": "Tổ 1, hàng 4",
+    "Nguyễn Diệu Linh": "Tổ 1, hàng 4",
+    "Hà Thị Ngọc Nhi": "Tổ 2, hàng 4",
+    "Tạ Hoàng Đức Anh": "Tổ 2, hàng 4",
+    "Nguyễn Bắc Đình Đô": "Tổ 3, hàng 4",
+    "Nguyễn Hoài An": "Tổ 3, hàng 4",
+    "Đỗ Công Bắc": "Tổ 4, hàng 4",
+    "Vũ Thị Minh Ngọc": "Tổ 4, hàng 4",
+    "Hà Duy Phong": "Tổ 1, hàng 5",
+    "Lý Ngọc Diệp": "Tổ 2, hàng 5",
+    "Lê Quý Trọng": "Tổ 2, hàng 5",
+    "Hà Gia Hân": "Tổ 3, hàng 5",
+    "Nông Vân Tùng": "Tổ 3, hàng 5",
+    "Đỗ Triệu Anh Nguyệt": "Tổ 4, hàng 5",
+    "Phạm Bảo An": "Tổ 4, hàng 6"
+  };
 
   // Check if already submitted on page load
   window.addEventListener('load', function() {
@@ -552,9 +709,8 @@ First, the user said: "no i just need the script part"
     
     // Specific validations
     if (inputId === 'answer1') {
-      // Name: At least 2 words, each word at least 2 letters
-      const words = value.split(/\s+/);
-      if (words.length < 2 || words.some(word => word.length < 2)) {
+      // Name: Must be exactly one of the allowed names
+      if (!allowedNames.includes(value)) {
         input.classList.add('error');
         setTimeout(() => {
           input.classList.remove('error');
@@ -562,21 +718,11 @@ First, the user said: "no i just need the script part"
         return false;
       }
     } else if (inputId === 'answer2') {
-      // Birthday: Must be in DD/MM/YYYY format, valid date, year 2012-2014
-      const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
-      const match = value.match(dateRegex);
-      if (!match) {
-        input.classList.add('error');
-        setTimeout(() => {
-          input.classList.remove('error');
-        }, 300);
-        return false;
-      }
-      const day = parseInt(match[1], 10);
-      const month = parseInt(match[2], 10);
-      const year = parseInt(match[3], 10);
-      const date = new Date(year, month - 1, day);
-      if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day || (year !== 2012 && year !== 2013 && year !== 2014)) {
+      // Birthday: Just check not empty, no format validation
+      // (Removed date validation)
+    } else if (inputId === 'answer3') {
+      // Student count: Must contain "39"
+      if (!value.includes("39")) {
         input.classList.add('error');
         setTimeout(() => {
           input.classList.remove('error');
@@ -584,7 +730,7 @@ First, the user said: "no i just need the script part"
         return false;
       }
     }
-    // Removed special validation for answer4 (question 4)
+    // Removed validation for answer4 - just check not empty (user chooses, counts if they input something)
 
     return true;
   }
@@ -723,14 +869,23 @@ First, the user said: "no i just need the script part"
       const success = await sendToEmail(answers);
       
       const finalMessage = document.getElementById('finalMessage');
-      if (success) {
+      
+      // Check if answers are correct (question 2 doesn't count, so check 1 and 3)
+      const isCorrect = allowedNames.includes(answers.name) && answers.studentCount.includes("39");
+      
+      if (success && isCorrect) {
+        // Redirect to the main page
+        window.location.href = 'https://thamtienta.github.io/7A7-thcsbk/main.html';
+      } else if (success) {
         finalMessage.innerHTML = 'Câu trả lời đã được gửi!<br>Hãy chờ 1-2 ngày để xác minh thành viên!';
       } else {
         finalMessage.innerHTML = 'Câu trả lời đã được lưu!<br><small>Sẽ gửi khi có internet.</small>';
       }
 
-      // Mark as submitted in localStorage
-      localStorage.setItem('7A7_submitted', 'true');
+      // Mark as submitted in localStorage only if sent successfully
+      if (success) {
+        localStorage.setItem('7A7_submitted', 'true');
+      }
     }, 500);
   }          
 
@@ -760,7 +915,50 @@ First, the user said: "no i just need the script part"
     for (let i = 0; i < elements.length; i++) {
       elements[i].classList.add("fade-out");
     }
+
+function handleSeatClick(event) {
+    const cell = event.target;
+    if (!cell.hasAttribute('data-position') || cell.getAttribute('data-position') === '') return; // Ignore empty cells
     
+    const position = cell.getAttribute('data-position');
+    
+    // Check if this position matches the user's name
+    if (position !== nameToPosition[answers.name]) {
+        // Shake the cell for error
+        cell.classList.add('error');
+        setTimeout(() => {
+            cell.classList.remove('error');
+        }, 300);
+        return;
+    }
+    
+    // Fill the input and submit
+    document.getElementById('answer4').value = position;
+    submitAnswers();
+}
+
+// Add click listeners to the board table (only when question 4 is shown)
+function setupBoardListeners() {
+    const table = document.getElementById('boardTable');
+    if (table) {
+        const cells = table.querySelectorAll('td[data-position]');
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleSeatClick);
+        });
+    }
+}
+
+// Call setupBoardListeners when question 4 loads
+// In nextQuestion(step), after showing question 4:
+if (step === 4) {
+    // ... existing code ...
+    document.getElementById('seatingBoard').style.display = 'block';
+    setupBoardListeners(); // Add this line
+}
+
+// In submitAnswers(), after hiding the board:
+document.getElementById('seatingBoard').style.display = 'none';
+      
     setTimeout(() => {
       for (let i = 0; i < elements.length; i++) {
         elements[i].style.display = "none";
