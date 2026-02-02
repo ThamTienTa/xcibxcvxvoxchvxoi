@@ -1,12 +1,300 @@
-<html>
-    <head>
-        <style>
-            body {
-                background-color: black;
-            }
-        </style>
-    </head>
-    <body>
-        <sr7-txt id="SR7_1263_1-1841-0" class="sr7-layer " aria-hidden="true" style="font-family: Manrope; font-size: 41px; font-weight: 800; color: rgb(255, 255, 255); text-transform: none; text-decoration: none; letter-spacing: -2.07455px; line-height: 41px; text-align: center; white-space: normal; overflow: visible; margin: 0px; padding: 0px; width: auto; height: auto; float: none; clear: none; z-index: 4; position: relative; vertical-align: inherit; transform-origin: 50% 50%; display: block; background: transparent; translate: none; rotate: none; scale: none; visibility: inherit; opacity: 1; transform: translate(0px, 0px); pointer-events: auto;">Đang cố tạo kiệt tác</sr7-txt>
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lớp 7A7</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f0a; color: white; }
+        .hero-section { position: relative; width: 100%; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; background: linear-gradient(135deg, #050f0a 0%, #0a1e14 50%, #050f0a 100%); }
+        .orb-container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 1; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.8; animation: float 20s infinite ease-in-out; }
+        .orb-1 { width: 800px; height: 550px; background: linear-gradient(225deg, rgba(7, 250, 163, 0.9) 0%, rgba(6, 244, 140, 0.79) 34%, rgba(6, 228, 115, 0.75) 40%, rgba(8, 157, 66, 0.41) 67%, rgba(4, 106, 45, 0) 100%); top: 15%; right: 10%; }
+        .orb-2 { width: 800px; height: 550px; background: linear-gradient(45deg, rgba(6, 55, 23, 0) 0%, rgba(4, 106, 15, 0.43) 40%, rgba(1, 183, 62, 0.75) 70%, rgba(0, 208, 88, 0.83) 80%, rgb(2, 220, 100) 100%); filter: blur(40px); top: -5%; left: -5%; animation-delay: -7s; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 25% { transform: translate(20px, -20px) scale(1.05); } 50% { transform: translate(-20px, 20px) scale(0.95); } 75% { transform: translate(15px, 15px) scale(1.02); } }
+        .content { position: relative; z-index: 10; text-align: center; padding: 60px 40px; max-width: 1200px; animation: fadeInUp 1s ease-out; }
+        .main-title { font-size: clamp(48px, 8vw, 90px); font-weight: 800; color: #ffffff; letter-spacing: -0.05em; line-height: 1; margin-bottom: 40px; }
+        .subtitle { font-size: clamp(14px, 2vw, 19px); font-weight: 300; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.15em; line-height: 1.4; margin-bottom: 50px; text-transform: uppercase; }
+        .cta-button, .submit-answer-btn { display: inline-block; padding: 20px 55px; font-size: 20px; font-weight: 800; color: #ffffff; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 12px; cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(10px); text-decoration: none; font-family: 'Manrope', sans-serif; position: relative; z-index: 101; }
+        .submit-answer-btn { background: linear-gradient(135deg, #07FAA3 0%, #02DC64 100%); color: #050f0a; }
+        .submit-answer-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .quiz-container { display: none; position: relative; z-index: 10; text-align: center; padding: 60px 40px; max-width: 1000px; animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .quiz-card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); border-radius: 24px; padding: 50px 40px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4); }
+        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; overflow: hidden; margin-bottom: 30px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #07FAA3 0%, #02DC64 100%); width: 0%; transition: width 0.5s ease; }
+        .question-number { display: inline-block; background: #07FAA3; color: #050f0a; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 700; margin-bottom: 30px; }
+        .question-text { font-size: clamp(24px, 4vw, 36px); font-weight: 700; margin-bottom: 50px; }
+        .input-container { margin: 40px 0; }
+        .name-input { width: 100%; padding: 20px 30px; font-size: 20px; color: #ffffff; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 16px; outline: none; }
+        .error-message { color: #ff4444; margin-top: 10px; display: none; }
+        .error-message.show { display: block; }
+        .hint-text { color: rgba(255, 255, 255, 0.4); font-size: 14px; margin-top: 10px; font-style: italic; display: none; }
+        .hint-text.show { display: block; }
+        .board-container { margin: 20px auto; max-width: 800px; }
+        .board-header { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; color: #07FAA3; font-weight: 800; font-size: 18px; }
+        .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .seat { background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; cursor: pointer !important; transition: all 0.3s ease; font-weight: 700; min-height: 60px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 60; }
+        .seat:hover { background: rgba(7, 250, 163, 0.1); border-color: #07FAA3; }
+        .seat.selected { background: rgba(7, 250, 163, 0.2); border-color: #07FAA3; }
+        .admin-btn { position: fixed; top: 20px; right: 20px; padding: 10px 25px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; z-index: 1000; }
+        .admin-panel { display: none; position: fixed; inset: 0; background: rgba(5,15,10,0.98); z-index: 2000; padding: 40px; overflow-y: auto; }
+        .submission-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .hidden { display: none !important; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body>
+    <button class="admin-btn" id="adminBtn">Admin</button>
+
+    <div class="admin-panel" id="adminPanel">
+        <div style="max-width: 1000px; margin: 0 auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h1>Danh sách bài nộp</h1>
+                <button onclick="closeAdmin()" style="padding: 10px 20px; background: #ff4444; color: white; border: none; border-radius: 5px; cursor: pointer;">Đóng</button>
+            </div>
+            <div id="adminContent"></div>
+        </div>
+    </div>
+
+    <div class="hero-section">
+        <div class="orb-container"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+        <div class="content" id="welcomeContent">
+            <h1 class="main-title">Chào mừng đến với<br>Lớp 7A7</h1>
+            <p class="subtitle">Hoàn thành bài kiểm tra để vào website</p>
+            <button class="cta-button" id="startButton">Bắt Đầu</button>
+        </div>
+        <div class="quiz-container" id="quizContainer">
+            <div class="quiz-card">
+                <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+                <span class="question-number" id="qNum">Câu hỏi 1/5</span>
+                <h2 class="question-text" id="qText">Nhập tên của bạn</h2>
+                <div id="inputArea">
+                    <div class="input-container">
+                        <input type="text" id="answerInput" class="name-input" autocomplete="off">
+                        <div class="error-message" id="errorMsg"></div>
+                        <div class="hint-text" id="hintText"></div>
+                    </div>
+                </div>
+                <div id="boardArea" class="hidden">
+                    <div class="board-container">
+                        <div class="board-header"><div>Tổ 4</div><div>Tổ 3</div><div>Tổ 2</div><div>Tổ 1</div></div>
+                        <div class="board" id="seatingBoard"></div>
+                    </div>
+                </div>
+                <button class="submit-answer-btn" id="confirmBtn">Xác Nhận</button>
+            </div>
+        </div>
+    </div>
+    <!-- Firebase libraries (MUST be first) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+/* ================= FIREBASE SETUP ================= */
+
+const  firebaseConfig = {
+  apiKey: "AIzaSyBx6YfJDocmt-WJQvsaKnaUEA_JohxdfC0",
+  authDomain: "a7-thcsbk.firebaseapp.com",
+  projectId: "a7-thcsbk",
+  storageBucket: "a7-thcsbk.firebasestorage.app",
+  messagingSenderId: "165000167523",
+  appId: "1:165000167523:web:c0d38ab755b699d62e3856",
+  measurementId: "G-KQDHS4BP3Z"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+/* ================= DATA ================= */
+
+const classList = [
+  "Nguyễn Hoài An","Phạm Bảo An","Đỗ Bảo Anh","Tạ Hoàng Đức Anh","Đỗ Phan Gia Bảo",
+  "Trương Minh Bảo","Đỗ Công Bắc","Phạm Ngọc Bích","Nguyễn Thị Quỳnh Chi","Lý Ngọc Diệp",
+  "Nguyễn Bùi Hải Đăng","Nguyễn Bắc Đình Độ","Hà Gia Hân","Nguyễn Ngọc Hạo",
+  "Hà Thị Thu Huệ","Nguyễn Trung Phúc Hưng","Phạm Phúc Hưng","Nguyễn Duy Khang",
+  "Dương Mộc Kỳ","Lương Diệu Linh","Nguyễn Diệu Linh","Nông Trà My","Vũ Thị Minh Ngọc",
+  "Đỗ Triệu Anh Nguyệt","Hà Thị Ngọc Nhi","Trương Yến Nhi","Nguyễn Phúc Như",
+  "Thân Tâm Như","Hà Duy Phong","Nguyễn Đăng Phú","Phạm Thu Quỳnh","Đặng Thái Sơn",
+  "Tạ Thiện Tâm","Nông Triệu Minh Thúy","Đàm Hà Trang","Lê Quý Trọng",
+  "Nguyễn Văn Trọng","Nông Vân Tùng","Trần Như Ý"
+];
+
+const questions = [
+  { text: "Nhập tên của bạn để xác nhận", type: "name" },
+  { text: "Ngày, tháng, năm sinh?", type: "input", correct: "01/01/2012" },
+  { text: "Lớp 7A7 có bao nhiêu học sinh?", type: "input", correct: "39" },
+  { text: "Cô chủ nhiệm lớp 7A7 là ai?", type: "input", correct: "Cô Hồng" },
+  { text: "Bạn ngồi chỗ nào?", type: "board" }
+];
+
+/* ================= STATE ================= */
+
+let currentIdx = 0;
+let score = 0;
+let studentName = "";
+let responses = [];
+
+/* ================= ELEMENTS ================= */
+
+const el = {
+  welcome: document.getElementById("welcomeContent"),
+  quiz: document.getElementById("quizContainer"),
+  qText: document.getElementById("qText"),
+  qNum: document.getElementById("qNum"),
+  progress: document.getElementById("progressBar"),
+  inputArea: document.getElementById("inputArea"),
+  boardArea: document.getElementById("boardArea"),
+  input: document.getElementById("answerInput"),
+  error: document.getElementById("errorMsg"),
+  confirm: document.getElementById("confirmBtn"),
+  board: document.getElementById("seatingBoard"),
+  admin: document.getElementById("adminPanel"),
+  content: document.getElementById("adminContent")
+};
+
+/* ================= HELPERS ================= */
+
+function normalize(str) {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .toLowerCase()
+    .trim();
+}
+
+/* ================= QUIZ ================= */
+
+document.getElementById("startButton").onclick = () => {
+  el.welcome.classList.add("hidden");
+  el.quiz.style.display = "block";
+  loadQuestion();
+};
+
+function loadQuestion() {
+  const q = questions[currentIdx];
+  el.qNum.innerText = `Câu hỏi ${currentIdx + 1}/${questions.length}`;
+  el.qText.innerText = q.text;
+  el.progress.style.width = `${(currentIdx / questions.length) * 100}%`;
+  el.error.classList.remove("show");
+  el.input.value = "";
+
+  if (q.type === "board") {
+    el.inputArea.classList.add("hidden");
+    el.boardArea.classList.remove("hidden");
+    el.confirm.disabled = true;
+    renderBoard();
+  } else {
+    el.inputArea.classList.remove("hidden");
+    el.boardArea.classList.add("hidden");
+    el.confirm.disabled = false;
+    el.input.focus();
+  }
+}
+
+function renderBoard() {
+  el.board.innerHTML = "";
+  for (let i = 1; i <= 24; i++) {
+    const seat = document.createElement("div");
+    seat.className = "seat";
+    seat.innerText = `H${Math.ceil(i / 4)}`;
+    seat.onclick = () => {
+      document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
+      seat.classList.add("selected");
+      el.confirm.disabled = false;
+    };
+    el.board.appendChild(seat);
+  }
+}
+
+el.confirm.onclick = () => {
+  const q = questions[currentIdx];
+  const val = el.input.value.trim();
+
+  if (q.type === "name") {
+    if (classList.some(n => normalize(n) === normalize(val))) {
+      studentName = val;
+      responses.push(val);
+      score++;
+      next();
+    } else {
+      el.error.innerText = "Tên không có trong danh sách!";
+      el.error.classList.add("show");
+    }
+  }
+
+  if (q.type === "input") {
+    responses.push(val);
+    if (normalize(val) === normalize(q.correct) || currentIdx === 1) score++;
+    next();
+  }
+
+  if (q.type === "board") {
+    const sel = document.querySelector(".seat.selected");
+    responses.push(sel.innerText);
+    score++;
+    next();
+  }
+};
+
+function next() {
+  currentIdx++;
+  if (currentIdx < questions.length) loadQuestion();
+  else finish();
+}
+
+/* ================= SAVE TO FIREBASE ================= */
+
+function finish() {
+  db.collection("submissions").add({
+    name: studentName,
+    score: `${score}/5`,
+    answers: responses,
+    date: new Date().toLocaleString(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  el.quiz.innerHTML = `
+    <div class="quiz-card">
+      <h1>Kết quả: ${score}/5</h1>
+      <p>Dữ liệu đã gửi cho Admin.</p>
+    </div>
+  `;
+}
+
+/* ================= ADMIN ================= */
+
+document.getElementById("adminBtn").onclick = () => {
+  const pass = prompt("Nhập mã bảo mật:");
+  if (pass !== "7777") return alert("Sai mã!");
+
+  db.collection("submissions")
+    .orderBy("createdAt", "desc")
+    .get()
+    .then(snapshot => {
+      el.content.innerHTML = snapshot.docs.map(doc => {
+        const s = doc.data();
+        return `
+          <div class="submission-card">
+            <h3>${s.name} - ${s.score}</h3>
+            <p>${s.date}</p>
+            <p>${s.answers.join(" | ")}</p>
+          </div>
+        `;
+      }).join("");
+      el.admin.style.display = "block";
+    });
+};
+
+window.closeAdmin = () => el.admin.style.display = "none";
+</script>
+</body>
 </html>
