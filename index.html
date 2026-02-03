@@ -7,6 +7,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f0a; color: white; }
@@ -91,23 +95,28 @@
         </div>
     </div>
     <!-- Firebase libraries (MUST be first) -->
-    <script>  // Block right click
-        document.addEventListener("contextmenu", e => e.preventDefault());
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+    // Block right click
+    document.addEventListener("contextmenu", e => e.preventDefault());
 
-// Block common devtool keys
-document.addEventListener("keydown", e => {
-    if (
-        e.key === "F12" ||
-        (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
-        (e.ctrlKey && e.key === "U")
-    ) {
-        e.preventDefault();
-        alert("❌ DevTools bị khóa!");
-    }
-});
-/* ================= ANTI F12 / DEVTOOLS ================= */
-
-(function () {
+    // Block common devtool keys
+    document.addEventListener("keydown", e => {
+        if (
+            e.key === "F12" ||
+            (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
+            (e.ctrlKey && e.key === "U")
+        ) {
+            e.preventDefault();
+            alert("❌ DevTools bị khóa!");
+        }
+    });
+</script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+(function() {
     let devtoolsOpen = false;
     let threshold = 160;
 
@@ -131,19 +140,25 @@ document.addEventListener("keydown", e => {
     }
 
     // Detect resize (DevTools dock)
-    setInterval(detectDevTools, 500);
+    if (!isMobile()) {
+        setInterval(detectDevTools, 500);
+    }
+
 
     // Block keys
-    document.addEventListener("keydown", function (e) {
-        if (
-            e.key === "F12" ||
-            (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
-            (e.ctrlKey && e.key === "U")
-        ) {
-            e.preventDefault();
-            triggerDevtools();
-        }
-    });
+document.addEventListener("keydown", function (e) {
+    if (isMobile()) return;
+
+    if (
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
+        (e.ctrlKey && e.key === "U")
+    ) {
+        e.preventDefault();
+        triggerDevtools();
+    }
+});
+
 
     // Block right click
     document.addEventListener("contextmenu", function (e) {
@@ -151,10 +166,7 @@ document.addEventListener("keydown", e => {
         alert("🚫 Right click disabled");
     });
 })();
-
 </script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script>
     /* ================= DATA & CONFIG ================= */
     const firebaseConfig = {
@@ -171,8 +183,21 @@ document.addEventListener("keydown", e => {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-/* ================= FIREBASE (already initialized above) ================= */
-// assumes: firebase + db already exist
+/* ================= HELPERS ================= */
+function normalize(str) {
+  return str
+    ? str.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .toLowerCase()
+        .trim()
+    : "";
+}
+
+function teacherAnswerOk(val) {
+  const n = normalize(val);
+  return n.includes("co") && (n.includes("hong") || n.includes("hng"));
+}
 
 /* ================= DATA ================= */
 const classList = [
@@ -208,206 +233,136 @@ const seatMap = {
   "ha gia han":18,"nong van tung":18,
   "ly ngoc diep":19,
   "do trieu anh nguyet":20,
-  "pham bao an":22
+  "pham bao an":23
 };
 
 const questions = [
-  { text: "Nhập tên của bạn để xác nhận", type: "name" },
-  { text: "Ngày, tháng, năm sinh?", type: "input" },
+  { text: "Nhập tên của bạn", type: "name" },
+  { text: "Ngày tháng năm sinh?", type: "input" },
   { text: "Lớp 7A7 có bao nhiêu học sinh?", type: "input" },
   { text: "Cô chủ nhiệm lớp 7A7 là ai?", type: "input" },
   { text: "Bạn ngồi chỗ nào?", type: "board" }
 ];
 
 /* ================= STATE ================= */
-let currentIdx = 0;
+let idx = 0;
 let score = 0;
 let studentName = "";
-let responses = [];
-let submissionId = null;
+let answers = [];
 
 /* ================= ELEMENTS ================= */
-const elements = {
+const el = {
+  start: document.getElementById("startButton"),
   welcome: document.getElementById("welcomeContent"),
   quiz: document.getElementById("quizContainer"),
   qText: document.getElementById("qText"),
   qNum: document.getElementById("qNum"),
   progress: document.getElementById("progressBar"),
-  inputArea: document.getElementById("inputArea"),
-  boardArea: document.getElementById("boardArea"),
   input: document.getElementById("answerInput"),
   error: document.getElementById("errorMsg"),
   confirm: document.getElementById("confirmBtn"),
-  board: document.getElementById("seatingBoard"),
-  admin: document.getElementById("adminPanel"),
-  content: document.getElementById("adminContent")
+  inputArea: document.getElementById("inputArea"),
+  boardArea: document.getElementById("boardArea"),
+  board: document.getElementById("seatingBoard")
 };
 
-/* ================= HELPERS ================= */
-function normalize(str) {
-  return str
-    ? str.normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/đ/g,"d").toLowerCase().trim()
-    : "";
-}
-
-function teacherAnswerOk(val) {
-  const n = normalize(val);
-  return n.includes("co") && (n.includes("hong") || n.includes("hng"));
-}
-
 /* ================= START ================= */
-document.getElementById("startButton").onclick = () => {
-  elements.welcome.classList.add("hidden");
-  elements.quiz.style.display = "block";
+el.start.onclick = () => {
+  el.welcome.classList.add("hidden");
+  el.quiz.style.display = "block";
   loadQuestion();
 };
 
 /* ================= QUIZ ================= */
 function loadQuestion() {
-  const q = questions[currentIdx];
-  elements.qNum.innerText = `Câu hỏi ${currentIdx+1}/${questions.length}`;
-  elements.qText.innerText = q.text;
-  elements.progress.style.width = `${(currentIdx/questions.length)*100}%`;
-  elements.error.classList.remove("show");
-  elements.input.value = "";
+  const q = questions[idx];
+  el.qNum.textContent = `Câu ${idx + 1}/${questions.length}`;
+  el.qText.textContent = q.text;
+  el.progress.style.width = `${(idx / questions.length) * 100}%`;
+  el.error.textContent = "";
+  el.input.value = "";
 
   if (q.type === "board") {
-    elements.inputArea.classList.add("hidden");
-    elements.boardArea.classList.remove("hidden");
-    elements.confirm.disabled = true;
+    el.inputArea.classList.add("hidden");
+    el.boardArea.classList.remove("hidden");
+    el.confirm.disabled = true;
     renderBoard();
   } else {
-    elements.inputArea.classList.remove("hidden");
-    elements.boardArea.classList.add("hidden");
-    elements.confirm.disabled = false;
+    el.inputArea.classList.remove("hidden");
+    el.boardArea.classList.add("hidden");
+    el.confirm.disabled = false;
   }
 }
 
 function renderBoard() {
-  elements.board.innerHTML = "";
-  for (let i=1;i<=24;i++) {
-    const d = document.createElement("div");
-    d.className = "seat";
-    d.onclick = () => {
-      document.querySelectorAll(".seat").forEach(s=>s.classList.remove("selected"));
-      d.classList.add("selected");
-      elements.confirm.disabled = false;
+  el.board.innerHTML = "";
+  for (let i = 1; i <= 24; i++) {
+    const seat = document.createElement("div");
+    seat.className = "seat";
+    seat.textContent = i;
+    seat.onclick = () => {
+      document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
+      seat.classList.add("selected");
+      el.confirm.disabled = false;
     };
-    elements.board.appendChild(d);
+    el.board.appendChild(seat);
   }
 }
 
-elements.confirm.onclick = () => {
-  const q = questions[currentIdx];
-  const val = elements.input.value.trim();
+el.confirm.onclick = () => {
+  const q = questions[idx];
+  const val = el.input.value.trim();
 
   if (q.type === "name") {
-    if (classList.some(n=>normalize(n)===normalize(val))) {
-      studentName = val;
-      responses.push(val);
-      score++;
-      next();
-    } else {
-      elements.error.innerText = "Tên không có trong danh sách!";
-      elements.error.classList.add("show");
+    if (!classList.some(n => normalize(n) === normalize(val))) {
+      el.error.textContent = "Tên không có trong danh sách!";
+      return;
     }
+    studentName = val;
+    score++;
   }
 
-  else if (q.type === "input") {
+  if (q.type === "input") {
     if (!val) return;
-    responses.push(val);
-
-    if (currentIdx === 1) score++; // birthday
-    if (currentIdx === 2 && val === "39") score++;
-    if (currentIdx === 3 && teacherAnswerOk(val)) score++;
-
-    next();
+    if (idx === 1) score++;
+    if (idx === 2 && val === "39") score++;
+    if (idx === 3 && teacherAnswerOk(val)) score++;
   }
 
-  else if (q.type === "board") {
+  if (q.type === "board") {
     const sel = document.querySelector(".seat.selected");
-    const idx = [...elements.board.children].indexOf(sel)+1;
-    responses.push(`Chỗ ${idx}`);
-    if (seatMap[normalize(studentName)] === idx) score++;
-    next();
+    const seatNum = [...el.board.children].indexOf(sel) + 1;
+    if (seatMap[normalize(studentName)] === seatNum) score++;
   }
-};
 
-function next() {
-  currentIdx++;
-  if (currentIdx < questions.length) loadQuestion();
-  else finish();
-}
+  answers.push(val || "seat");
+  idx++;
+  idx < questions.length ? loadQuestion() : finish();
+};
 
 /* ================= FINISH ================= */
 function finish() {
+  localStorage.setItem("studentName", studentName);
+
   db.collection("submissions").add({
     name: studentName,
-    score: `${score}/5`,
-    answers: responses,
+    score,
+    answers,
     approved: false,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(doc=>{
-    submissionId = doc.id;
-    waitForApproval();
   });
 
-  elements.quiz.innerHTML = `
+  el.quiz.innerHTML = `
     <div class="quiz-card">
-      <h1>Kết quả: ${score}/5</h1>
+      <h1>${score}/5</h1>
       <p>⏳ Chờ Admin duyệt</p>
-      <button id="enterBtn" class="cta-button hidden">Vào Website</button>
     </div>
   `;
 }
 
-function waitForApproval() {
-  db.collection("submissions").doc(submissionId)
-    .onSnapshot(doc=>{
-      if (doc.exists && doc.data().approved) {
-        const btn = document.getElementById("enterBtn");
-        btn.classList.remove("hidden");
-        btn.onclick = ()=>location.href="main.html";
-      }
-    });
-}
-
-/* ================= ADMIN ================= */
-document.getElementById("adminBtn").onclick = () => {
-  if (prompt("Mã admin") !== "7777") return;
-
-  db.collection("submissions").orderBy("createdAt","desc").get()
-  .then(snap=>{
-    elements.content.innerHTML = snap.docs.map(d=>{
-      const s=d.data();
-      return `
-        <div class="submission-card">
-          <b>${s.name}</b> — ${s.score}<br>
-          ${s.answers.join(" | ")}<br>
-          ${s.approved ? "✔ Đã duyệt" :
-          `<button onclick="approve('${d.id}')">Accept</button>`}
-        </div>
-      `;
-    }).join("");
-    elements.admin.style.display="block";
-  });
-};
-
-window.approve = id => {
-  db.collection("submissions").doc(id).update({approved:true})
-  .then(()=>location.reload());
-};
-
-window.closeAdmin = () => elements.admin.style.display="none";
-
 /* ================= ENTER KEY ================= */
-document.addEventListener("keydown", e=>{
-  if (e.key==="Enter" && !elements.confirm.disabled) {
-    e.preventDefault();
-    elements.confirm.click();
-  }
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter") el.confirm.click();
 });
 </script>
 </body>
