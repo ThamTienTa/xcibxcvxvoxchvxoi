@@ -91,6 +91,21 @@
         </div>
     </div>
     <!-- Firebase libraries (MUST be first) -->
+    <script>  // Block right click
+        document.addEventListener("contextmenu", e => e.preventDefault());
+
+// Block common devtool keys
+document.addEventListener("keydown", e => {
+    if (
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
+        (e.ctrlKey && e.key === "U")
+    ) {
+        e.preventDefault();
+        alert("❌ DevTools bị khóa!");
+    }
+});
+</script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script>
@@ -109,169 +124,244 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const classList = ["Nguyễn Hoài An", "Phạm Bảo An", "Đỗ Bảo Anh", "Tạ Hoàng Đức Anh", "Đỗ Phan Gia Bảo", "Trương Minh Bảo", "Đỗ Công Bắc", "Phạm Ngọc Bích", "Nguyễn Thị Quỳnh Chi", "Lý Ngọc Diệp", "Nguyễn Bùi Hải Đăng", "Nguyễn Bắc Đình Độ", "Hà Gia Hân", "Nguyễn Ngọc Hạo", "Hà Thị Thu Huệ", "Nguyễn Trung Phúc Hưng", "Phạm Phúc Hưng", "Nguyễn Duy Khang", "Dương Mộc Kỳ", "Lương Diệu Linh", "Nguyễn Diệu Linh", "Nông Trà My", "Vũ Thị Minh Ngọc", "Đỗ Triệu Anh Nguyệt", "Hà Thị Ngọc Nhi", "Trương Yến Nhi", "Nguyễn Phúc Như", "Thân Tâm Như", "Hà Duy Phong", "Nguyễn Đăng Phú", "Phạm Thu Quỳnh", "Đặng Thái Sơn", "Tạ Thiện Tâm", "Nông Triệu Minh Thúy", "Đàm Hà Trang", "Lê Quý Trọng", "Nguyễn Văn Trọng", "Nông Vân Tùng", "Trần Như Ý"];
-    const seatMap = { "dang thai son": 1, "nguyen trung phuc hung": 1, "pham phuc hung": 1, "pham ngoc bich": 2, "truong yen nhi": 2, "ha thi ngoc nhi": 2, "nong tra my": 3, "truong minh bao": 3, "nguyen phuc nhu": 4, "do phan gia bao": 4, "pham thu quynh": 5, "nguyen duy khang": 5, "nguyen bui hai dang": 6, "tran nhu y": 6, "le quy trong": 7, "nguyen van trong": 7, "do bao anh": 7, "nguyen ngoc hao": 8, "dam ha trang": 8, "ta thien tam": 9, "nguyen dang phu": 10, "nong trieu minh thuy": 10, "nguyen thi quynh chi": 11, "ha thi thu hue": 11, "than tam nhu": 12, "duong moc ky": 12, "luong dieu linh": 13, "nguyen dieu linh": 13, "nguyen hoai an": 14, "ta hoang duc anh": 15, "do cong bac": 16, "vu thi minh ngoc": 16, "ha duy phong": 17, "ha gia han": 18, "nong van tung": 18, "ly ngoc diep": 19, "do trieu anh nguyet": 20, "pham bao an": 22 };
+/* ================= FIREBASE (already initialized above) ================= */
+// assumes: firebase + db already exist
 
-    const questions = [
-        { text: "Nhập tên của bạn để xác nhận", type: "name" },
-        { text: "Ngày, tháng, năm sinh?", type: "input", correct: "01/01/2012" },
-        { text: "Lớp 7A7 có bao nhiêu học sinh?", type: "input", correct: "39" },
-        { text: "Cô chủ nhiệm lớp 7A7 là ai?", type: "input", correct: "Cô Hồng", hint: "Cô Sigma, Cô Thanh Hóa" },
-        { text: "Bạn ngồi chỗ nào?", type: "board" }
-    ];
+/* ================= DATA ================= */
+const classList = [
+  "Nguyễn Hoài An","Phạm Bảo An","Đỗ Bảo Anh","Tạ Hoàng Đức Anh","Đỗ Phan Gia Bảo",
+  "Trương Minh Bảo","Đỗ Công Bắc","Phạm Ngọc Bích","Nguyễn Thị Quỳnh Chi",
+  "Lý Ngọc Diệp","Nguyễn Bùi Hải Đăng","Nguyễn Bắc Đình Độ","Hà Gia Hân",
+  "Nguyễn Ngọc Hạo","Hà Thị Thu Huệ","Nguyễn Trung Phúc Hưng","Phạm Phúc Hưng",
+  "Nguyễn Duy Khang","Dương Mộc Kỳ","Lương Diệu Linh","Nguyễn Diệu Linh",
+  "Nông Trà My","Vũ Thị Minh Ngọc","Đỗ Triệu Anh Nguyệt","Hà Thị Ngọc Nhi",
+  "Trương Yến Nhi","Nguyễn Phúc Như","Thân Tâm Như","Hà Duy Phong",
+  "Nguyễn Đăng Phú","Phạm Thu Quỳnh","Đặng Thái Sơn","Tạ Thiện Tâm",
+  "Nông Triệu Minh Thúy","Đàm Hà Trang","Lê Quý Trọng","Nguyễn Văn Trọng",
+  "Nông Vân Tùng","Trần Như Ý"
+];
 
-    /* ================= STATE ================= */
-    let currentIdx = 0, score = 0, studentName = "", responses = [];
-    const elements = { 
-        welcome: document.getElementById('welcomeContent'), 
-        quiz: document.getElementById('quizContainer'), 
-        qText: document.getElementById('qText'), 
-        qNum: document.getElementById('qNum'), 
-        progress: document.getElementById('progressBar'), 
-        inputArea: document.getElementById('inputArea'), 
-        boardArea: document.getElementById('boardArea'), 
-        input: document.getElementById('answerInput'), 
-        error: document.getElementById('errorMsg'), 
-        hint: document.getElementById('hintText'),
-        confirm: document.getElementById('confirmBtn'), 
-        board: document.getElementById('seatingBoard'), 
-        admin: document.getElementById('adminPanel'), 
-        content: document.getElementById('adminContent') 
+const seatMap = {
+  "dang thai son":1,"nguyen trung phuc hung":1,"pham phuc hung":1,
+  "pham ngoc bich":2,"truong yen nhi":2,"ha thi ngoc nhi":2,
+  "nong tra my":3,"truong minh bao":3,
+  "nguyen phuc nhu":4,"do phan gia bao":4,
+  "pham thu quynh":5,"nguyen duy khang":5,
+  "nguyen bui hai dang":6,"tran nhu y":6,
+  "le quy trong":7,"nguyen van trong":7,"do bao anh":7,
+  "nguyen ngoc hao":8,"dam ha trang":8,
+  "ta thien tam":9,
+  "nguyen dang phu":10,"nong trieu minh thuy":10,
+  "nguyen thi quynh chi":11,"ha thi thu hue":11,
+  "than tam nhu":12,"duong moc ky":12,
+  "luong dieu linh":13,"nguyen dieu linh":13,
+  "nguyen hoai an":14,"ta hoang duc anh":15,
+  "do cong bac":16,"vu thi minh ngoc":16,
+  "ha duy phong":17,
+  "ha gia han":18,"nong van tung":18,
+  "ly ngoc diep":19,
+  "do trieu anh nguyet":20,
+  "pham bao an":22
+};
+
+const questions = [
+  { text: "Nhập tên của bạn để xác nhận", type: "name" },
+  { text: "Ngày, tháng, năm sinh?", type: "input" },
+  { text: "Lớp 7A7 có bao nhiêu học sinh?", type: "input" },
+  { text: "Cô chủ nhiệm lớp 7A7 là ai?", type: "input" },
+  { text: "Bạn ngồi chỗ nào?", type: "board" }
+];
+
+/* ================= STATE ================= */
+let currentIdx = 0;
+let score = 0;
+let studentName = "";
+let responses = [];
+let submissionId = null;
+
+/* ================= ELEMENTS ================= */
+const elements = {
+  welcome: document.getElementById("welcomeContent"),
+  quiz: document.getElementById("quizContainer"),
+  qText: document.getElementById("qText"),
+  qNum: document.getElementById("qNum"),
+  progress: document.getElementById("progressBar"),
+  inputArea: document.getElementById("inputArea"),
+  boardArea: document.getElementById("boardArea"),
+  input: document.getElementById("answerInput"),
+  error: document.getElementById("errorMsg"),
+  confirm: document.getElementById("confirmBtn"),
+  board: document.getElementById("seatingBoard"),
+  admin: document.getElementById("adminPanel"),
+  content: document.getElementById("adminContent")
+};
+
+/* ================= HELPERS ================= */
+function normalize(str) {
+  return str
+    ? str.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g,"d").toLowerCase().trim()
+    : "";
+}
+
+function teacherAnswerOk(val) {
+  const n = normalize(val);
+  return n.includes("co") && (n.includes("hong") || n.includes("hng"));
+}
+
+/* ================= START ================= */
+document.getElementById("startButton").onclick = () => {
+  elements.welcome.classList.add("hidden");
+  elements.quiz.style.display = "block";
+  loadQuestion();
+};
+
+/* ================= QUIZ ================= */
+function loadQuestion() {
+  const q = questions[currentIdx];
+  elements.qNum.innerText = `Câu hỏi ${currentIdx+1}/${questions.length}`;
+  elements.qText.innerText = q.text;
+  elements.progress.style.width = `${(currentIdx/questions.length)*100}%`;
+  elements.error.classList.remove("show");
+  elements.input.value = "";
+
+  if (q.type === "board") {
+    elements.inputArea.classList.add("hidden");
+    elements.boardArea.classList.remove("hidden");
+    elements.confirm.disabled = true;
+    renderBoard();
+  } else {
+    elements.inputArea.classList.remove("hidden");
+    elements.boardArea.classList.add("hidden");
+    elements.confirm.disabled = false;
+  }
+}
+
+function renderBoard() {
+  elements.board.innerHTML = "";
+  for (let i=1;i<=24;i++) {
+    const d = document.createElement("div");
+    d.className = "seat";
+    d.onclick = () => {
+      document.querySelectorAll(".seat").forEach(s=>s.classList.remove("selected"));
+      d.classList.add("selected");
+      elements.confirm.disabled = false;
     };
+    elements.board.appendChild(d);
+  }
+}
 
-    /* ================= HELPERS ================= */
-    function normalize(str) { return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().trim().replace(/\s+/g, ' ') : ""; }
+elements.confirm.onclick = () => {
+  const q = questions[currentIdx];
+  const val = elements.input.value.trim();
 
-    /* ================= QUIZ LOGIC ================= */
-    document.getElementById('startButton').onclick = () => {
-        elements.welcome.classList.add('hidden');
-        elements.quiz.style.display = 'block';
-        loadQuestion();
-    };
-
-    function loadQuestion() {
-        const q = questions[currentIdx];
-        elements.qNum.innerText = `Câu hỏi ${currentIdx + 1}/${questions.length}`;
-        elements.qText.innerText = q.text;
-        elements.progress.style.width = `${(currentIdx / questions.length) * 100}%`;
-        elements.error.classList.remove('show');
-        elements.hint.classList.remove('show');
-        elements.input.value = "";
-
-        if (q.hint) {
-            elements.hint.innerText = `Gợi ý: ${q.hint}`;
-            elements.hint.classList.add('show');
-        }
-
-        if (q.type === 'board') {
-            elements.inputArea.classList.add('hidden');
-            elements.boardArea.classList.remove('hidden');
-            elements.confirm.disabled = true;
-            renderBoard();
-        } else {
-            elements.inputArea.classList.remove('hidden');
-            elements.boardArea.classList.add('hidden');
-            elements.confirm.disabled = false;
-            elements.input.focus();
-        }
+  if (q.type === "name") {
+    if (classList.some(n=>normalize(n)===normalize(val))) {
+      studentName = val;
+      responses.push(val);
+      score++;
+      next();
+    } else {
+      elements.error.innerText = "Tên không có trong danh sách!";
+      elements.error.classList.add("show");
     }
+  }
 
-    function renderBoard() {
-        elements.board.innerHTML = "";
-        for (let i = 1; i <= 24; i++) {
-            const seat = document.createElement('div');
-            seat.className = 'seat';
-            seat.innerText = (i === 21 || i === 23 || i === 24) ? "" : `H${Math.ceil(i/4)}`;
-            seat.onclick = () => {
-                document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected'));
-                seat.classList.add('selected');
-                elements.confirm.disabled = false;
-            };
-            elements.board.appendChild(seat);
-        }
-    }
+  else if (q.type === "input") {
+    if (!val) return;
+    responses.push(val);
 
-    elements.confirm.onclick = () => {
-        const q = questions[currentIdx];
-        let val = elements.input.value.trim();
+    if (currentIdx === 1) score++; // birthday
+    if (currentIdx === 2 && val === "39") score++;
+    if (currentIdx === 3 && teacherAnswerOk(val)) score++;
 
-        if (q.type === 'name') {
-            if (classList.some(n => normalize(n) === normalize(val))) {
-                studentName = val;
-                responses.push(val);
-                score++;
-                next();
-            } else {
-                elements.error.innerText = "Tên không có trong danh sách!";
-                elements.error.classList.add('show');
-            }
-        } else if (q.type === 'input') {
-            if (!val) return;
-            responses.push(val);
-            if (currentIdx === 1 || normalize(val) === normalize(q.correct)) score++;
-            next();
-        } else if (q.type === 'board') {
-            const sel = document.querySelector('.seat.selected');
-            const idx = Array.from(elements.board.children).indexOf(sel) + 1;
-            responses.push(`Chỗ ${idx}`);
-            if (seatMap[normalize(studentName)] === idx) score++;
-            next();
-        }
-    };
+    next();
+  }
 
-    function next() {
-        currentIdx++;
-        if (currentIdx < questions.length) loadQuestion();
-        else finish();
-    }
+  else if (q.type === "board") {
+    const sel = document.querySelector(".seat.selected");
+    const idx = [...elements.board.children].indexOf(sel)+1;
+    responses.push(`Chỗ ${idx}`);
+    if (seatMap[normalize(studentName)] === idx) score++;
+    next();
+  }
+};
 
-    function finish() {
-        // Save to Firebase
-        try {
-            db.collection("submissions").add({
-                name: studentName,
-                score: `${score}/5`,
-                answers: responses,
-                date: new Date().toLocaleString(),
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        } catch (e) { console.error("Firebase error:", e); }
+function next() {
+  currentIdx++;
+  if (currentIdx < questions.length) loadQuestion();
+  else finish();
+}
 
-        elements.quiz.innerHTML = `
-            <div class="quiz-card">
-                <h1>Kết quả: ${score}/5</h1>
-                <p style="margin-top:20px; color:rgba(255,255,255,0.7)">Dữ liệu đã được gửi đến Admin.</p>
-                <p style="margin-top:10px; color:#07FAA3; font-weight: 700;">Hãy chờ 1-2 ngày để xác nhận!</p>
-                <button class="cta-button" style="margin-top:30px; padding: 15px 40px; font-size: 18px;" onclick="location.reload()">Xong</button>
-            </div>`;
-    }
+/* ================= FINISH ================= */
+function finish() {
+  db.collection("submissions").add({
+    name: studentName,
+    score: `${score}/5`,
+    answers: responses,
+    approved: false,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(doc=>{
+    submissionId = doc.id;
+    waitForApproval();
+  });
 
-    /* ================= ADMIN PANEL ================= */
-    document.getElementById('adminBtn').addEventListener('click', () => {
-        const passcode = prompt("Nhập mã bảo mật:");
-        if (passcode === "7777") {
-            db.collection("submissions").orderBy("createdAt", "desc").get().then(snapshot => {
-                elements.content.innerHTML = snapshot.docs.map(doc => {
-                    const s = doc.data();
-                    return `
-                        <div class="submission-card">
-                            <h3 style="color:#07FAA3">${s.name} - ${s.score}</h3>
-                            <p style="font-size:12px; color:rgba(255,255,255,0.5)">${s.date}</p>
-                            <p style="margin-top:10px; line-height:1.6"><strong>Trả lời:</strong><br>${s.answers.join(' | ')}</p>
-                        </div>
-                    `;
-                }).join('') || "<p style='text-align:center; margin-top:50px;'>Chưa có dữ liệu bài nộp nào.</p>";
-                elements.admin.style.display = 'block';
-            }).catch(e => {
-                console.error(e);
-                alert("Lỗi khi tải dữ liệu từ Firebase. Hãy kiểm tra kết nối mạng.");
-            });
-        } else if (passcode !== null) {
-            alert("Sai mã bảo mật!");
-        }
+  elements.quiz.innerHTML = `
+    <div class="quiz-card">
+      <h1>Kết quả: ${score}/5</h1>
+      <p>⏳ Chờ Admin duyệt</p>
+      <button id="enterBtn" class="cta-button hidden">Vào Website</button>
+    </div>
+  `;
+}
+
+function waitForApproval() {
+  db.collection("submissions").doc(submissionId)
+    .onSnapshot(doc=>{
+      if (doc.exists && doc.data().approved) {
+        const btn = document.getElementById("enterBtn");
+        btn.classList.remove("hidden");
+        btn.onclick = ()=>location.href="thamtienta.github.io/main.html";
+      }
     });
+}
 
-    window.closeAdmin = () => elements.admin.style.display = 'none';
+/* ================= ADMIN ================= */
+document.getElementById("adminBtn").onclick = () => {
+  if (prompt("Mã admin") !== "7777") return;
+
+  db.collection("submissions").orderBy("createdAt","desc").get()
+  .then(snap=>{
+    elements.content.innerHTML = snap.docs.map(d=>{
+      const s=d.data();
+      return `
+        <div class="submission-card">
+          <b>${s.name}</b> — ${s.score}<br>
+          ${s.answers.join(" | ")}<br>
+          ${s.approved ? "✔ Đã duyệt" :
+          `<button onclick="approve('${d.id}')">Accept</button>`}
+        </div>
+      `;
+    }).join("");
+    elements.admin.style.display="block";
+  });
+};
+
+window.approve = id => {
+  db.collection("submissions").doc(id).update({approved:true})
+  .then(()=>location.reload());
+};
+
+window.closeAdmin = () => elements.admin.style.display="none";
+
+/* ================= ENTER KEY ================= */
+document.addEventListener("keydown", e=>{
+  if (e.key==="Enter" && !elements.confirm.disabled) {
+    e.preventDefault();
+    elements.confirm.click();
+  }
+});
 </script>
 </body>
 </html>
