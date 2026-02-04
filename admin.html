@@ -67,7 +67,6 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
 
 .cta-button,
 .submit-answer-btn {
-  padding: 18px 50px;
   font-size: 18px;
   font-weight: 800;
   border-radius: 12px;
@@ -82,9 +81,6 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
 }
 
 .admin-btn {
-  position: fixed;
-  top: 60%;
-  right: 47%;
   padding: 15px 37.5px;
   background: rgba(255,255,255,.1);
   color: white;
@@ -92,6 +88,10 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
   border-radius: 8px;
   cursor: pointer;
   z-index: 1000;
+}
+
+.admin-btn:hover {
+  background: rgba(255,255,255,.2);
 }
 
 .admin-panel {
@@ -113,7 +113,6 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
 }
 </style>
 </head>
-
 <body>
 
 <section class="hero-section">
@@ -121,25 +120,28 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
   </div>
-
-  <div class="content">
-    <div class="main-title">7A7</div>
-    <div class="subtitle">Admin System</div>
-  </div>
 </section>
 
-<button class="admin-btn" onclick="openAdmin()">Enter</button>
-
 <div id="adminPanel" class="admin-panel">
-  <h1 style="margin-bottom:30px;">📋 Submissions</h1>
+  <h1 style="margin-bottom:30px;">📋 7A7 Admin Panel</h1>
   <div id="submissionList"></div>
-
-  <button class="cta-button" onclick="closeAdmin()" style="margin-top:30px;">
-    Close
-  </button>
 </div>
 
 <script>
+/* ========= PASSCODE PROMPT ON LOAD ========= */
+window.onload = () => {
+  const pass = prompt("🔐 Câu hỏi bảo mật:\nNhập passcode để vào Admin");
+
+  if (pass !== "Tamzin15613") {
+    alert("❌ Truy cập bị từ chối");
+    location.href = "https://thamtienta.github.io/7A7-thcsbk/";
+    return;
+  }
+
+  document.getElementById("adminPanel").style.display = "block";
+  loadSubmissions();
+};
+
 /* ========= FIREBASE ========= */
 firebase.initializeApp({
   apiKey: "AIzaSyBx6YfJDocmt-WJQvsaKnaUEA_JohxdfC0",
@@ -151,18 +153,7 @@ firebase.initializeApp({
 });
 const db = firebase.firestore();
 
-/* ========= ADMIN ========= */
-function openAdmin() {
-  if (prompt("Admin password") !== "7777") return;
-  document.getElementById("adminPanel").style.display = "block";
-  loadSubmissions();
-}
-
-function closeAdmin() {
-  document.getElementById("adminPanel").style.display = "none";
-}
-
-/* ========= LOAD ========= */
+/* ========= LOAD SUBMISSIONS ========= */
 function loadSubmissions() {
   db.collection("submissions")
     .orderBy("createdAt","desc")
@@ -183,14 +174,7 @@ function loadSubmissions() {
               ${
                 s.approved
                   ? `<div style="color:#07FAA3;font-weight:800;">✔ Approved</div>`
-                  : `
-                    <button
-                      class="submit-answer-btn"
-                      onclick="approve('${d.id}')"
-                    >
-                      ✅ Accept
-                    </button>
-                  `
+                  : `<button class="submit-answer-btn" onclick="approve('${d.id}')">✅ Accept</button>`
               }
             </div>
           `;
@@ -198,6 +182,7 @@ function loadSubmissions() {
     });
 }
 
+/* ========= APPROVE ========= */
 function approve(id) {
   db.collection("submissions").doc(id).update({
     approved: true
