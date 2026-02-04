@@ -98,11 +98,10 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(5,15,10,.98);
   z-index: 2000;
   padding: 40px;
   overflow-y: auto;
-  opacity: 0.5;
+  opacity: 1;
 }
 
 .submission-card {
@@ -111,6 +110,11 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
   border-radius: 12px;
   margin-bottom: 15px;
   border: 1px solid rgba(255,255,255,.1);
+}
+
+.idk {
+  opacity: 1.0;
+  color: white;
 }
 </style>
 </head>
@@ -124,7 +128,7 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
 </section>
 
 <div id="adminPanel" class="admin-panel">
-  <h1 style="margin-bottom:30px;">📋 7A7 Admin Panel</h1>
+  <h1 style="margin-bottom:30px;" class="idk">📋 7A7 Admin Panel</h1>
   <div id="submissionList"></div>
 </div>
 
