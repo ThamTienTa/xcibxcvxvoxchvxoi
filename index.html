@@ -53,8 +53,6 @@
     </style>
 </head>
 <body>
-    <button class="admin-btn" id="adminBtn" onclick="location.href='https://thamtienta.github.io/7A7-thcsbk/admin.html'">Admin</button>
-    
     <div class="hero-section">
         <div class="orb-container"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
         <div class="content" id="welcomeContent">
@@ -350,17 +348,26 @@ elements.confirm.onclick = () => {
   const q = questions[currentIdx];
   const val = elements.input.value.trim();
 
-  if (q.type === "name") {
-    if (classList.some(n=>normalize(n)===normalize(val))) {
-      studentName = val;
-      responses.push(val);
-      score++;
-      next();
-    } else {
-      elements.error.innerText = "Tên không có trong danh sách!";
-      elements.error.classList.add("show");
+if (q.type === "name") {
+
+    // 🔐 hidden admin access
+    if (normalize(val) === "admin") {
+        location.href = "https://thamtienta.github.io/7A7-thcsbk/admin";
+        return;
     }
-  }
+
+    // 👨‍🎓 normal student flow
+    if (classList.some(n => normalize(n) === normalize(val))) {
+        studentName = val;
+        responses.push(val);
+        score++;
+        next();
+    } else {
+        elements.error.innerText = "Tên không có trong danh sách!";
+        elements.error.classList.add("show");
+    }
+}
+
 
   else if (q.type === "input") {
     if (!val) return;
@@ -429,41 +436,6 @@ function waitForApproval(submissionId) {
         });
 }
 
-/* ================= ADMIN ================= */
-document.getElementById("adminBtn").onclick = () => {
-  if (prompt("Mã admin") !== "7777") return;
-
-  db.collection("submissions").orderBy("createdAt","desc").get()
-  .then(snap=>{
-    elements.content.innerHTML = snap.docs.map(d=>{
-      const s=d.data();
-      return `
-        <div class="submission-card">
-          <b>${s.name}</b> — ${s.score}<br>
-          ${s.answers.join(" | ")}<br>
-          ${s.approved ? "✔ Đã duyệt" :
-          `<button onclick="approve('${d.id}')">Accept</button>`}
-        </div>
-      `;
-    }).join("");
-    elements.admin.style.display="block";
-  });
-};
-
-window.approve = id => {
-  db.collection("submissions").doc(id).update({approved:true})
-  .then(()=>location.reload());
-};
-
-window.closeAdmin = () => elements.admin.style.display="none";
-
-/* ================= ENTER KEY ================= */
-document.addEventListener("keydown", e=>{
-  if (e.key==="Enter" && !elements.confirm.disabled) {
-    e.preventDefault();
-    elements.confirm.click();
-  }
-});
 </script>
 </body>
 </html>
