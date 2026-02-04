@@ -1,1 +1,209 @@
-nothing
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<title>7A7</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f0a; color: white; }
+
+.hero-section {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #050f0a 0%, #0a1e14 50%, #050f0a 100%);
+}
+
+.orb-container { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .8; animation: float 20s infinite ease-in-out; }
+
+.orb-1 {
+  width: 800px; height: 550px;
+  background: linear-gradient(225deg, rgba(7,250,163,.9), rgba(6,228,115,.75), rgba(4,106,45,0));
+  top: 15%; right: 10%;
+}
+.orb-2 {
+  width: 800px; height: 550px;
+  background: linear-gradient(45deg, rgba(6,55,23,0), rgba(1,183,62,.75), rgb(2,220,100));
+  top: -5%; left: -5%;
+  filter: blur(40px);
+  animation-delay: -7s;
+}
+
+@keyframes float {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(-20px,20px) scale(.95); }
+}
+
+.content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 60px 40px;
+}
+
+.main-title {
+  font-size: clamp(48px, 8vw, 90px);
+  font-weight: 800;
+  margin-bottom: 30px;
+}
+
+.subtitle {
+  font-size: 16px;
+  letter-spacing: .15em;
+  opacity: .6;
+  margin-bottom: 50px;
+}
+
+.cta-button,
+.submit-answer-btn {
+  padding: 18px 50px;
+  font-size: 18px;
+  font-weight: 800;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.submit-answer-btn {
+  background: linear-gradient(135deg,#07FAA3,#02DC64);
+  color: #050f0a;
+}
+
+.admin-btn {
+  position: fixed;
+  top: 60%;
+  right: 47%;
+  padding: 15px 37.5px;
+  background: rgba(255,255,255,.1);
+  color: white;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.admin-panel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5,15,10,.98);
+  z-index: 2000;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.submission-card {
+  background: rgba(255,255,255,.05);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  border: 1px solid rgba(255,255,255,.1);
+}
+</style>
+</head>
+
+<body>
+
+<section class="hero-section">
+  <div class="orb-container">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <div class="content">
+    <div class="main-title">7A7</div>
+    <div class="subtitle">Admin System</div>
+  </div>
+</section>
+
+<button class="admin-btn" onclick="openAdmin()">Enter</button>
+
+<div id="adminPanel" class="admin-panel">
+  <h1 style="margin-bottom:30px;">📋 Submissions</h1>
+  <div id="submissionList"></div>
+
+  <button class="cta-button" onclick="closeAdmin()" style="margin-top:30px;">
+    Close
+  </button>
+</div>
+
+<script>
+/* ========= FIREBASE ========= */
+firebase.initializeApp({
+  apiKey: "AIzaSyBx6YfJDocmt-WJQvsaKnaUEA_JohxdfC0",
+  authDomain: "a7-thcsbk.firebaseapp.com",
+  projectId: "a7-thcsbk",
+  storageBucket: "a7-thcsbk.firebasestorage.app",
+  messagingSenderId: "165000167523",
+  appId: "1:165000167523:web:c0d38ab755b699d62e3856"
+});
+const db = firebase.firestore();
+
+/* ========= ADMIN ========= */
+function openAdmin() {
+  if (prompt("Admin password") !== "7777") return;
+  document.getElementById("adminPanel").style.display = "block";
+  loadSubmissions();
+}
+
+function closeAdmin() {
+  document.getElementById("adminPanel").style.display = "none";
+}
+
+/* ========= LOAD ========= */
+function loadSubmissions() {
+  db.collection("submissions")
+    .orderBy("createdAt","desc")
+    .get()
+    .then(snap => {
+      document.getElementById("submissionList").innerHTML =
+        snap.docs.map(d => {
+          const s = d.data();
+          return `
+            <div class="submission-card">
+              <b style="font-size:20px;">${s.name}</b><br>
+              <span style="opacity:.6;">Score: ${s.score}</span>
+
+              <div style="margin:10px 0;">
+                ${s.answers.join(" | ")}
+              </div>
+
+              ${
+                s.approved
+                  ? `<div style="color:#07FAA3;font-weight:800;">✔ Approved</div>`
+                  : `
+                    <button
+                      class="submit-answer-btn"
+                      onclick="approve('${d.id}')"
+                    >
+                      ✅ Accept
+                    </button>
+                  `
+              }
+            </div>
+          `;
+        }).join("");
+    });
+}
+
+function approve(id) {
+  db.collection("submissions").doc(id).update({
+    approved: true
+  }).then(loadSubmissions);
+}
+</script>
+
+</body>
+</html>
