@@ -436,6 +436,13 @@ function waitForApproval(submissionId) {
         });
 }
 
+/* ================= ENTER KEY ================= */
+document.addEventListener("keydown", e=>{
+  if (e.key==="Enter" && !elements.confirm.disabled) {
+    e.preventDefault();
+    elements.confirm.click();
+  }
+});
 </script>
 </body>
 </html>
