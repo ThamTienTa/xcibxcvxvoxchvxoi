@@ -282,7 +282,6 @@ let currentIdx = 0;
 let score = 0;
 let studentName = "";
 let responses = [];
-let submissionId = null;
 
 /* ================= ELEMENTS ================= */
 const elements = {
@@ -401,52 +400,43 @@ function next() {
 
 /* ================= FINISH ================= */
 function finish() {
-
-    // 🔑 SAVE STUDENT NAME FOR NEXT PAGE
-    localStorage.setItem("studentName", studentName);
-
     // Save to Firebase
-    try {
-        db.collection("submissions").add({
-            name: studentName,
-            score: `${score}/5`,
-            answers: responses,
-            approved: false, // IMPORTANT
-            date: new Date().toLocaleString(),
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-    } catch (e) {
+    db.collection("submissions").add({
+        name: studentName,
+        score: `${score}/5`,
+        answers: responses,
+        approved: false,
+        date: new Date().toLocaleString(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(docRef => {
+        // Start listening for approval
+        waitForApproval(docRef.id);
+    }).catch(e => {
         console.error("Firebase error:", e);
-    }
+    });
 
     elements.quiz.innerHTML = `
         <div class="quiz-card">
-            <h1>Kết quả: ${score}/5</h1>
-            <p style="margin-top:20px; color:rgba(255,255,255,0.7)">
+            <h1>🎉 Kết quả: ${score}/5</h1>
+            <p style="margin-top:20px; color:rgba(255,255,255,0.8); font-size:18px;">
                 Đã gửi bài. Chờ Admin duyệt 👨‍🏫
             </p>
+            <button id="enterBtn" class="cta-button hidden" style="margin-top:30px;">
+                Vào Website →
+            </button>
         </div>`;
 }
 
-
-  elements.quiz.innerHTML = `
-    <div class="quiz-card">
-      <h1>Kết quả: ${score}/5</h1>
-      <p>⏳ Chờ Admin duyệt</p>
-      <button id="enterBtn" class="cta-button hidden">Vào Website</button>
-    </div>
-  `;
-
-
-function waitForApproval() {
-  db.collection("submissions").doc(submissionId)
-    .onSnapshot(doc=>{
-      if (doc.exists && doc.data().approved) {
-        const btn = document.getElementById("enterBtn");
-        btn.classList.remove("hidden");
-        btn.onclick = ()=>location.href="thamtienta.github.io/main.html";
-      }
-    });
+function waitForApproval(submissionId) {
+    db.collection("submissions").doc(submissionId)
+        .onSnapshot(doc => {
+            if (doc.exists && doc.data().approved) {
+                document.getElementById("enterBtn").classList.remove("hidden");
+                document.getElementById("enterBtn").onclick = () => {
+                    location.href = "https://thamtienta.github.io/7A7-thcs/main.html";
+                };
+            }
+        });
 }
 
 /* ================= ADMIN ================= */
