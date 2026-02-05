@@ -49,136 +49,278 @@
         .submission-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
-    <div class="hero-section">
-        <div class="orb-container"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
-        <div class="content" id="welcomeContent">
-            <h1 class="main-title">Chào mừng đến với<br>Lớp 7A7</h1>
-            <p class="subtitle">Đăng nhập để tiếp tục</p>
-            <button class="cta-button" id="startButton">Tiếp tục</button>
+
+    <section class="hero-section">
+        <div class="orb-container">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
         </div>
-  <!-- PROFILE -->
-  <div class="profile hidden" id="profileCard">
-    <img id="avatar" class="avatar" src="https://via.placeholder.com/120"
-         onclick="avatarInput.click()">
-    <input type="file" id="avatarInput" hidden>
 
-    <h1 id="fullName">Họ và tên</h1>
-    <p id="accountName">@account</p>
-    <p>🎂 <span id="birth">---</span></p>
+        <div class="content" id="welcomeContent">
+            <h1 class="main-title">LỚP 7A7</h1>
+            <p class="subtitle">TRƯỜNG THCS BÁCH KHOA</p>
+            <button class="cta-button" id="startButton">Bắt Đầu</button>
+        </div>
 
-    <button class="profile-btn" onclick="location.href='place.html'">
-      Go to the place →
-    </button>
-  </div>
+        <div class="quiz-container" id="quizContainer">
+            <div class="quiz-card">
+                <div class="progress-bar"><div class="progressFill" id="progressBar"></div></div>
+                <span class="question-number" id="qNum">Câu hỏi 1/5</span>
+                <h2 class="question-text" id="qText">Nhập tên của bạn</h2>
+                <div id="inputArea">
+                    <div class="input-container">
+                        <input type="text" id="answerInput" class="name-input" autocomplete="off">
+                        <div class="error-message" id="errorMsg"></div>
+                        <div class="hint-text" id="hintText"></div>
+                    </div>
+                </div>
+                <div id="boardArea" class="hidden">
+                    <div class="board-container">
+                        <div class="board-header"><div>Tổ 4</div><div>Tổ 3</div><div>Tổ 2</div><div>Tổ 1</div></div>
+                        <div class="board" id="seatingBoard"></div>
+                    </div>
+                </div>
+                <button class="submit-answer-btn" id="confirmBtn">Xác Nhận</button>
+            </div>
+        </div>
+    </section>
 
-</div>
+    <script>
+        // FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBx6YfJDocmt-WJQvsaKnaUEA_JohxdfC0",
+            authDomain: "a7-thcsbk.firebaseapp.com",
+            projectId: "a7-thcsbk",
+            storageBucket: "a7-thcsbk.firebasestorage.app",
+            messagingSenderId: "165000167523",
+            appId: "1:165000167523:web:c0d38ab755b699d62e3856",
+            measurementId: "G-KQDHS4BP3Z"
+        };
 
-<!-- CONFIRM MODAL -->
-<div id="confirmModal" class="hidden">
-  <div class="confirm-box">
-    <h2 id="confirmText"></h2>
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-    <div class="confirm-actions" id="confirmButtons">
-      <button class="confirm-yes" onclick="confirmYes()">Có</button>
-      <button class="confirm-no" onclick="confirmNo()">Không</button>
-    </div>
+        // QUESTIONS (moved up to fix ReferenceError)
+        const questions = [
+            { text: "Nhập tên của bạn để xác nhận", type: "name", hint: "Tên đầy đủ của bạn" },
+            { text: "Ngày, tháng, năm sinh?", type: "input", hint: "dd/mm/yyyy" },
+            { text: "Lớp 7A7 có bao nhiêu học sinh?", type: "input", hint: "Số lượng học sinh" },
+            { text: "Cô chủ nhiệm lớp 7A7 là ai?", type: "input", hint: "Tên cô giáo" },
+            { text: "Bạn ngồi chỗ nào?", type: "board", hint: "Chọn vị trí của bạn" }
+        ];
 
-    <div id="chatBox" class="hidden">
-      <p>Có chuyện gì không đúng?</p>
-      <textarea id="chatInput"></textarea>
-      <button class="chat-send" onclick="sendChat()">Gửi & tiếp tục</button>
-    </div>
-  </div>
-</div>
+        // DATA
+        const classList = [
+            "Nguyễn Hoài An","Phạm Bảo An","Đỗ Bảo Anh","Tạ Hoàng Đức Anh","Đỗ Phan Gia Bảo",
+            "Trương Minh Bảo","Đỗ Công Bắc","Phạm Ngọc Bích","Nguyễn Thị Quỳnh Chi",
+            "Lý Ngọc Diệp","Nguyễn Bùi Hải Đăng","Nguyễn Bắc Đình Độ","Hà Gia Hân",
+            "Nguyễn Ngọc Hạo","Hà Thị Thu Huệ","Nguyễn Trung Phúc Hưng","Phạm Phúc Hưng",
+            "Nguyễn Duy Khang","Dương Mộc Kỳ","Lương Diệu Linh","Nguyễn Diệu Linh",
+            "Nông Trà My","Vũ Thị Minh Ngọc","Đỗ Triệu Anh Nguyệt","Hà Thị Ngọc Nhi",
+            "Trương Yến Nhi","Nguyễn Phúc Như","Thân Tâm Như","Hà Duy Phong",
+            "Nguyễn Đăng Phú","Phạm Thu Quỳnh","Đặng Thái Sơn","Tạ Thiện Tâm",
+            "Nông Triệu Minh Thúy","Đàm Hà Trang","Lê Quý Trọng","Nguyễn Văn Trọng",
+            "Nông Vân Tùng","Trần Như Ý"
+        ];
 
-<script>
-/* ================= FIREBASE ================= */
-firebase.initializeApp({
-  apiKey:"AIzaSyBx6YfJDocmt-WJQvsaKnaUEA_JohxdfC0",
-  authDomain:"a7-thcsbk.firebaseapp.com",
-  projectId:"a7-thcsbk"
-});
-const db=firebase.firestore();
+        const seatMap = {
+            "nguyen hoai an":1,"pham bao an":1,"do bao anh":1,"ta hoang duc anh":1,"do phan gia bao":1,
+            "truong minh bao":2,"do cong bac":2,"pham ngoc bich":2,"nguyen thi quyenh chi":3,"ly ngoc diep":4,
+            "nguyen bui hai dang":5,"nguyen bac dinh do":5,"ha gia han":6,"nguyen ngoc hao":6,"ha thi thu hue":6,
+            "nguyen trung phuc hung":7,"pham phuc hung":7,"nguyen duy khang":8,"duong muc ky":9,"luong dieu linh":10,
+            "nguyen dieu linh":10,"nong tra my":11,"vu thi minh ngoc":11,
+            "do trieu anh nguyet":12,"ha thi ngoc nhi":12,"truong yen nhi":13,"nguyen phuc nhu":13,
+            "than tam nhu":13,"ha duy phong":14,"nguyen dang phu":15,"pham thu quynh":15,
+            "dang thai son":16,"ta thien tam":16,"nong trieuminh thuy":17,"dam ha trang":17,
+            "le quy trong":18,"nguyen van trong":18,"nong van tung":19,"tran nhu y":20
+        };
 
-/* ================= ELEMENTS ================= */
-const loginButton=document.getElementById("loginButton");
-const confirmModal=document.getElementById("confirmModal");
-const confirmText=document.getElementById("confirmText");
-const welcomeContent=document.getElementById("welcomeContent");
-const profileCard=document.getElementById("profileCard");
+        // STATE
+        let currentIdx = 0;
+        let score = 0;
+        let studentName = "";
+        let responses = [];
 
-const fullNameEl=document.getElementById("fullName");
-const accountEl=document.getElementById("accountName");
-const birthEl=document.getElementById("birth");
+        // ELEMENTS
+        const elements = {
+            welcome: document.getElementById("welcomeContent"),
+            quiz: document.getElementById("quizContainer"),
+            qText: document.getElementById("qText"),
+            qNum: document.getElementById("qNum"),
+            progressBar: document.getElementById("progressBar"),
+            inputArea: document.getElementById("inputArea"),
+            boardArea: document.getElementById("boardArea"),
+            input: document.getElementById("answerInput"),
+            error: document.getElementById("errorMsg"),
+            hint: document.getElementById("hintText"),
+            confirm: document.getElementById("confirmBtn"),
+            board: document.getElementById("seatingBoard"),
+            admin: document.getElementById("adminPanel"),
+            content: document.getElementById("adminContent")
+        };
 
-const avatar=document.getElementById("avatar");
-const avatarInput=document.getElementById("avatarInput");
+        // HELPERS
+        function normalize(str) {
+            return str
+                ? str.normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/đ/g, "d")
+                    .toLowerCase()
+                    .trim()
+                : "";
+        }
 
-/* ================= HELPERS ================= */
-function normalizeToId(str){
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-    .replace(/đ/g,"d").toLowerCase().trim().replace(/\s+/g,"-");
-}
+        function teacherAnswerOk(val) {
+            const n = normalize(val);
+            return n.includes("co") && (n.includes("hong") || n.includes("hng"));
+        }
 
-/* ================= LOGIN ================= */
-loginButton.onclick=async()=>{
-  const studentName=localStorage.getItem("studentName");
-  if(!studentName){alert("Chưa đăng nhập");return;}
+        // START
+        document.getElementById("startButton").onclick = () => {
+            elements.welcome.classList.add("hidden");
+            elements.quiz.style.display = "block";
+            loadQuestion();
+        };
 
-  const id=normalizeToId(studentName);
-  const doc=await db.collection("students").doc(id).get();
+        // QUIZ
+        function loadQuestion() {
+            elements.confirm.disabled = false; // FIX #2: Ensure button is enabled
 
-  confirmText.innerText=`Bạn có phải là ${studentName} không?`;
-  confirmModal.classList.remove("hidden");
+            const q = questions[currentIdx];
+            elements.qNum.innerText = `Câu hỏi ${currentIdx+1}/${questions.length}`;
+            elements.qText.innerText = q.text;
 
-  window.__student={id,studentName,data:doc.exists?doc.data():{}};
-};
+            if (q.type === "board") {
+                elements.inputArea.classList.add("hidden");
+                elements.boardArea.classList.remove("hidden");
+                renderBoard();
+                elements.confirm.disabled = true;
+            } else {
+                elements.inputArea.classList.remove("hidden");
+                elements.boardArea.classList.add("hidden");
+                elements.input.value = "";
+                elements.error.classList.remove("show");
+                elements.hint.classList.remove("show");
+                elements.confirm.disabled = false;
 
-/* ================= CONFIRM ================= */
-function confirmYes(){
-  const {studentName,data,id}=window.__student;
+                if (q.hint) {
+                    elements.hint.innerText = q.hint;
+                    elements.hint.classList.add("show");
+                }
+            }
+        }
 
-  fullNameEl.innerText=data.fullName||studentName;
-  accountEl.innerText="@"+(data.account||id);
-  birthEl.innerText=data.birth||"---";
+        function renderBoard() {
+            elements.board.innerHTML = "";
+            for (let i=1;i<=24;i++) {
+                const d = document.createElement("div");
+                d.className = "seat";
+                d.onclick = () => {
+                    document.querySelectorAll(".seat").forEach(s=>s.classList.remove("selected"));
+                    d.classList.add("selected");
+                    elements.confirm.disabled = false;
+                };
+                elements.board.appendChild(d);
+            }
+        }
 
-  confirmModal.classList.add("hidden");
-  welcomeContent.classList.add("hidden");
-  profileCard.classList.remove("hidden");
-}
+        elements.confirm.onclick = () => {
+            const q = questions[currentIdx];
+            const val = elements.input.value.trim();
 
-function confirmNo(){
-  document.getElementById("confirmButtons").classList.add("hidden");
-  document.getElementById("chatBox").classList.remove("hidden");
-}
+            // Check if admin access at Question 1
+            if (currentIdx === 0 && val.toLowerCase() === "admin") {
+                window.location.href = "https://thamtienta.github.io/7A7-thcs/admin";
+                return;
+            }
 
-function sendChat(){
-  const msg=document.getElementById("chatInput").value.trim();
-  if(!msg)return;
+            if (q.type === "name") {
+                if (!val) {
+                    elements.error.innerText = "Vui lòng nhập tên!";
+                    elements.error.classList.add("show");
+                    return;
+                }
 
-  db.collection("loginIssues").add({
-    message:msg,
-    time:new Date()
-  });
+                const n = normalize(val);
+                const found = classList.some(name => normalize(name)===n);
 
-  confirmYes();
-}
+                if (found) {
+                    studentName = val;
+                    responses.push(val);
+                    score++;
+                    next();
+                } else {
+                    elements.error.innerText = "Tên không có trong danh sách!";
+                    elements.error.classList.add("show");
+                }
+            }
 
-/* ================= AVATAR ================= */
-avatarInput.onchange=()=>{
-  const f=avatarInput.files[0];
-  if(!f)return;
-  const r=new FileReader();
-  r.onload=()=>{avatar.src=r.result;localStorage.setItem("avatar",r.result)};
-  r.readAsDataURL(f);
-};
+            else if (q.type === "input") {
+                if (!val) return;
 
-const saved=localStorage.getItem("avatar");
-if(saved)avatar.src=saved;
-</script>
+                responses.push(val);
+
+                if (currentIdx === 1) score++; // birthday
+                if (currentIdx === 2 && val === "39") score++;
+                if (currentIdx === 3 && teacherAnswerOk(val)) score++;
+
+                next();
+            }
+
+            else if (q.type === "board") {
+                const sel = document.querySelector(".seat.selected"); // FIX #3: Check if seat is selected
+                if (!sel) {
+                    elements.error.innerText = "Vui lòng chọn chỗ ngồi!";
+                    elements.error.classList.add("show");
+                    return;
+                }
+                const idx = [...elements.board.children].indexOf(sel)+1;
+                responses.push(`Chỗ ${idx}`);
+                if (seatMap[normalize(studentName)] === idx) score++;
+                next();
+            }
+        };
+
+        function next() {
+            currentIdx++;
+            if (currentIdx < questions.length) loadQuestion();
+            else finish();
+        }
+
+        function finish() {
+            elements.quiz.innerHTML = `
+                <div class="quiz-card">
+                    <h1>🎉 Kết quả: ${score}/5</h1>
+                    <p style="margin-top:20px; color:rgba(255,255,255,0.8); font-size:18px;">
+                        Cảm ơn bạn đã làm bài!
+                    </p>
+                </div>`;
+
+            // Save to Firebase
+            try {
+                db.collection("submissions").add({
+                    name: studentName,
+                    score: `${score}/5`,
+                    answers: responses,
+                    date: new Date().toLocaleString(),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (e) {
+                console.error("Firebase error:", e);
+            }
+        }
+
+        // ENTER KEY FUNCTIONALITY
+        document.addEventListener("keydown", e=>{
+            if (e.key==="Enter" && !elements.confirm.disabled) {
+                e.preventDefault();
+                elements.confirm.click();
+            }
+        });
+    </script>
 </body>
 </html>
