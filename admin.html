@@ -56,6 +56,7 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
   font-size: clamp(48px, 8vw, 90px);
   font-weight: 800;
   margin-bottom: 30px;
+  opacity: .6;
 }
 
 .subtitle {
@@ -119,18 +120,20 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
 </style>
 </head>
 <body>
-
+<div id="adminPanel" class="admin-panel">
+  <div id="submissionList"></div>
+</div>
 <section class="hero-section">
   <div class="orb-container">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
   </div>
-</section>
 
-<div id="adminPanel" class="admin-panel">
-  <h1 style="margin-bottom:30px;" class="idk">📋 7A7 Admin Panel</h1>
-  <div id="submissionList"></div>
-</div>
+  <div class="content">
+    <h1 class="main-title">📋 7A7 Admin Panel</h1>
+    <p class="subtitle">Quản lý xác minh học sinh</p>
+  </div>
+</section>
 
 <script>
 /* ========= PASSCODE PROMPT ON LOAD ========= */
@@ -169,19 +172,20 @@ function loadSubmissions() {
       snap.forEach(d => {
         const s = d.data();
 
-        const isBlank =
-          !s.name || s.name.trim() === "" ||
-          !s.nameKey || s.nameKey.trim() === "" ||
-          !Array.isArray(s.answers) ||
-          s.answers.length === 0;
+        // 🔥 DELETE BLANK / BROKEN SUBMISSIONS
+const isBlank =
+  !s.name || s.name.trim() === "" ||
+  !s.nameKey || s.nameKey.trim() === "" ||
+  !Array.isArray(s.answers) ||
+  s.answers.length === 0;
+
 
         if (isBlank) {
-          deletes.push(
-            db.collection("submissions").doc(d.id).delete()
-          );
-          return;
+          deletes.push(db.collection("submissions").doc(d.id).delete());
+          return; // skip rendering
         }
 
+        // ✅ VALID SUBMISSION
         list.push(`
           <div class="submission-card">
             <b style="font-size:20px;">${s.name}</b><br>
@@ -191,51 +195,38 @@ function loadSubmissions() {
               ${s.answers.join(" | ")}
             </div>
 
-            function approve(docId) {
-  db.collection("submissions")
-    .doc(docId)
-    .update({
-      verified: true, // ✅ MUST MATCH student check
-      approvedAt: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then(() => {
-      loadSubmissions(); // refresh admin list
-    })
-    .catch(err => {
-      console.error("Approve failed:", err);
-      alert("❌ Approve failed");
-    });
-}
-
+            ${
+              s.verified
+                ? `<div style="color:#07FAA3;font-weight:800;">✔ Approved</div>`
+                : `<button class="submit-answer-btn" onclick="approve('${d.id}')">✅ Accept</button>`
+            }
           </div>
         `);
       });
 
+      // Render valid ones
       document.getElementById("submissionList").innerHTML = list.join("");
 
+      // Execute deletes
       if (deletes.length) {
         Promise.all(deletes).then(() => {
-          console.log("🧹 Deleted blank submissions:", deletes.length);
+          console.log("🧹 Blank submissions deleted:", deletes.length);
         });
       }
     });
 }
+
+
 /* ========= APPROVE ========= */
 function approve(docId) {
-  db.collection("submissions")
-    .doc(docId)
-    .update({
-      verified: true,
-      approvedAt: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then(() => {
-      loadSubmissions(); // 🔄 refresh list
-    })
-    .catch(err => {
-      console.error("Approve failed:", err);
-      alert("❌ Approve failed");
-    });
+  db.collection("submissions").doc(docId).update({
+    verified: true,
+    approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    loadSubmissions(); // 🔄 refresh UI
+  });
 }
+
 </script>
 
 </body>
