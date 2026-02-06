@@ -51,7 +51,8 @@
         .seat-21 {  grid-column: 3;}
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
-    </style>
+
+</style>
 </head>
 <body>
 
@@ -104,6 +105,47 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+
+        // AUTO REDIRECT IF VERIFIED
+const savedName = localStorage.getItem("studentName");
+
+if (savedName) {
+    db.collection("submissions")
+      .where("name", "==", savedName)
+      .where("verified", "==", true)
+      .limit(1)
+      .get()
+      .then(snap => {
+          if (!snap.empty) {
+              window.location.href =
+                "https://thamtienta.github.io/7A7-thcsbk/main";
+          }
+      });
+}
+
+
+        if (isQuizDone()) {
+    document.body.innerHTML = `
+        <div style="
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:#050f0a;
+            color:white;
+            font-family:Manrope;
+            text-align:center;
+        ">
+            <div>
+                <h1>⏳ Tài khoản của bạn chưa được xác minh</h1>
+                <p style="opacity:.6;margin-top:10px;">
+                    Vui lòng chờ admin xác nhận
+                </p>
+            </div>
+        </div>
+    `;
+}
+
 
         // QUESTIONS (moved up to fix ReferenceError)
         const questions = [
@@ -380,28 +422,27 @@ else if (q.type === "input") {
             else finish();
         }
 
-        function finish() {
-            elements.quiz.innerHTML = `
-                <div class="quiz-card">
-                    <h1>🎉 Kết quả: ${score}/5</h1>
-                    <p style="margin-top:20px; color:rgba(255,255,255,0.8); font-size:18px;">
-                        Cảm ơn bạn đã làm bài!
-                    </p>
-                </div>`;
+function finish() {
+    markQuizDone(); // ✅ SAVE ONLY HERE
 
-            // Save to Firebase
-            try {
-                db.collection("submissions").add({
-                    name: studentName,
-                    score: `${score}/5`,
-                    answers: responses,
-                    date: new Date().toLocaleString(),
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            } catch (e) {
-                console.error("Firebase error:", e);
-            }
-        }
+    elements.quiz.innerHTML = `
+        <div class="quiz-card">
+            <h1>🎉 Kết quả: ${score}/5</h1>
+            <p style="margin-top:20px; opacity:.7;">
+                Đang chờ xác minh từ admin
+            </p>
+        </div>
+    `;
+
+    db.collection("submissions").add({
+        name: studentName,
+        score: `${score}/5`,
+        answers: responses,
+        verified: false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+}
+
 
         // ENTER KEY FUNCTIONALITY
         document.addEventListener("keydown", e=>{
@@ -410,6 +451,19 @@ else if (q.type === "input") {
                 elements.confirm.click();
             }
         });
+
+        function markQuizDone() {
+            localStorage.setItem("quizDone", "true");
+        }
+
+        function isQuizDone() {
+            return localStorage.getItem("quizDone") === "true";
+        }
+
+        function clearQuizDone() {
+            localStorage.removeItem("quizDone");
+        }
+
     </script>
 </body>
 </html>
