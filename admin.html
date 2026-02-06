@@ -439,15 +439,14 @@ else if (q.type === "input") {
         }
 
 function finish() {
-    if (!studentName) {
-        console.error("Finish blocked: studentName is empty");
+    // 🚫 STOP blank / early submits
+    if (!studentName || responses.length !== questions.length) {
+        console.warn("Blocked blank submission");
         return;
     }
 
-    // ✅ mark quiz done ONLY here
     localStorage.setItem("quizDone", "true");
 
-    // ✅ SAVE TO FIREBASE ONLY AFTER QUIZ IS DONE
     db.collection("submissions").add({
         name: studentName,
         nameKey: normalize(studentName),
@@ -457,7 +456,6 @@ function finish() {
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // optional UI
     elements.quiz.innerHTML = `
         <div class="quiz-card">
             <h1>🎉 Kết quả: ${score}/5</h1>
@@ -469,13 +467,19 @@ function finish() {
 }
 
 
-        // ENTER KEY FUNCTIONALITY
-        document.addEventListener("keydown", e=>{
-            if (e.key==="Enter" && !elements.confirm.disabled) {
-                e.preventDefault();
-                elements.confirm.click();
-            }
-        });
+
+document.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        if (elements.confirm.disabled) return;
+        e.preventDefault();
+        elements.confirm.disabled = true; // 🔒 lock
+        setTimeout(() => {
+            elements.confirm.disabled = false;
+        }, 300);
+        elements.confirm.click();
+    }
+});
+
 
         function markQuizDone() {
             localStorage.setItem("quizDone", "true");
