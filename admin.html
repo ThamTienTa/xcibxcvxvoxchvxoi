@@ -177,7 +177,7 @@ function loadSubmissions() {
               </div>
 
               ${
-                s.approved
+                s.verified
                   ? `<div style="color:#07FAA3;font-weight:800;">✔ Approved</div>`
                   : `<button class="submit-answer-btn" onclick="approve('${d.id}')">✅ Accept</button>`
               }
@@ -188,11 +188,15 @@ function loadSubmissions() {
 }
 
 /* ========= APPROVE ========= */
-function approve(id) {
-  db.collection("submissions").doc(id).update({
-    approved: true
-  }).then(loadSubmissions);
+function approve(docId) {
+  db.collection("submissions").doc(docId).update({
+    verified: true,
+    approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    loadSubmissions(); // 🔄 refresh UI
+  });
 }
+
 </script>
 
 </body>
