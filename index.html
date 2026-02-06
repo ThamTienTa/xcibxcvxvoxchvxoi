@@ -128,14 +128,15 @@ const quizDone = localStorage.getItem("quizDone") === "true";
 if (savedName && quizDone) {
   db.collection("submissions")
     .where("nameKey", "==", normalize(savedName))
+    .orderBy("createdAtClient", "desc")
     .limit(1)
-    .get()
-    .then(snap => {
-      // ❌ Not found in Firebase → RESET
+    .onSnapshot(snap => {
+      // ❌ No submission found → RESET
       if (snap.empty) {
         localStorage.removeItem("studentName");
         localStorage.removeItem("quizDone");
-        location.reload();
+        localStorage.removeItem("submitted");
+        setTimeout(() => location.reload(), 300);
         return;
       }
 
@@ -362,7 +363,7 @@ function isValidDateDMY(val) {
 
             // Check if admin access at Question 1
             if (currentIdx === 0 && val.toLowerCase() === "admin") {
-                window.location.href = "https://thamtienta.github.io/7A7-thcs/admin";
+                window.location.href = "https://thamtienta.github.io/7A7-thcsbk/admin";
                 return;
             }
 
@@ -388,6 +389,7 @@ function isValidDateDMY(val) {
                     responses.push(val);
                     score++;
                     next();
+
                 } else {
                     elements.error.innerText = "Tên không có trong danh sách!";
                     elements.error.classList.add("show");
@@ -430,55 +432,59 @@ else if (q.type === "input") {
             }
         };
 
+function saveSubmission() {
+  if (!studentName || responses.length !== 5) return;
+
+  db.collection("submissions").add({
+    name: studentName,
+    nameKey: normalize(studentName),
+    answers: responses,
+    score: `${score}/5`,
+    verified: false,
+
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    createdAtClient: Date.now() // ✅ ADD THIS
+  });
+}
+
+function markQuizDone() {
+  localStorage.setItem("quizDone", "true");
+}
+
+function finish() {
+  markQuizDone();
+
+  localStorage.setItem("studentName", studentName);
+
+  saveSubmission(); // 🔥🔥🔥 THIS WAS MISSING
+
+  elements.quiz.innerHTML = `
+    <div class="quiz-card">
+      <h1>🎉 Kết quả: ${score}/5</h1>
+      <p style="margin-top:20px; opacity:.7;">
+        Đang chờ xác minh từ admin
+      </p>
+    </div>
+  `;
+}
+
         function next() {
             currentIdx++;
             if (currentIdx < questions.length) loadQuestion();
             else finish();
         }
 
-function finish() {
-localStorage.setItem("studentName", studentName);
-localStorage.setItem("quizDone", "true");
-    markQuizDone(); // ✅ SAVE ONLY HERE
-
-    elements.quiz.innerHTML = `
-        <div class="quiz-card">
-            <h1>🎉 Kết quả: ${score}/5</h1>
-            <p style="margin-top:20px; opacity:.7;">
-                Đang chờ xác minh từ admin
-            </p>
-        </div>
-    `};
-
-db.collection("submissions").add({
-  name: studentName,
-  nameKey: normalize(studentName), // 🔥 REQUIRED
-  score: `${score}/5`,
-  answers: responses,
-  verified: false,
-  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+document.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        if (elements.confirm.disabled) return;
+        e.preventDefault();
+        elements.confirm.disabled = true; // 🔒 lock
+        setTimeout(() => {
+            elements.confirm.disabled = false;
+        }, 300);
+        elements.confirm.click();
+    }
 });
-
-        // ENTER KEY FUNCTIONALITY
-        document.addEventListener("keydown", e=>{
-            if (e.key==="Enter" && !elements.confirm.disabled) {
-                e.preventDefault();
-                elements.confirm.click();
-            }
-        });
-
-        function markQuizDone() {
-            localStorage.setItem("quizDone", "true");
-        }
-
-        function isQuizDone() {
-            return localStorage.getItem("quizDone") === "true";
-        }
-
-        function clearQuizDone() {
-            localStorage.removeItem("quizDone");
-        }
-
     </script>
 </body>
 </html>
