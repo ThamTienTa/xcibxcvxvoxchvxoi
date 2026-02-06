@@ -89,6 +89,26 @@
                 <button class="submit-answer-btn" id="confirmBtn">Xác Nhận</button>
             </div>
         </div>
+        <div id="waitingScreen" style="
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#050f0a;
+  color:white;
+  font-family:Manrope;
+  text-align:center;
+  z-index:9999;
+">
+  <div>
+    <h1>⏳ Đang chờ admin confirming</h1>
+    <p style="opacity:.6;margin-top:10px;">
+      Quay lại sau khoảng 12 giờ đến 1 ngày
+    </p>
+  </div>
+</div>
+
     </section>
 
     <script>
@@ -123,7 +143,10 @@ function startVerificationListener() {
   const quizDone = localStorage.getItem("quizDone") === "true";
   const submitted = localStorage.getItem("submitted") === "true";
 
-  if (!savedName || !quizDone || !submitted) return;
+  if (!savedName || !quizDone || !submitted) {
+    document.getElementById("waitingScreen").style.display = "none";
+    return;
+  }
 
   db.collection("submissions")
     .where("nameKey", "==", normalize(savedName))
@@ -131,43 +154,19 @@ function startVerificationListener() {
     .limit(1)
     .onSnapshot(snap => {
 
-      if (snap.empty) {
-        console.log("⏳ Waiting for submission to appear");
-        return;
-      }
+      if (snap.empty) return;
 
       const data = snap.docs[0].data();
-      console.log("📦 LISTEN:", data);
 
       if (data.verified === true) {
-        console.log("✅ VERIFIED → TELEPORT");
         window.location.href =
           "https://thamtienta.github.io/7A7-thcsbk/main";
         return;
       }
 
-      if (!document.getElementById("waitingScreen")) {
-        document.body.insertAdjacentHTML("beforeend", `
-          <div id="waitingScreen" style="
-            position:fixed;
-            inset:0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            background:#050f0a;
-            color:white;
-            z-index:9999;
-          ">
-            <div style="text-align:center;">
-              <h1>⏳ Chờ xác minh danh tính</h1>
-              <p style="opacity:.6;">Vui lòng chờ admin xác nhận</p>
-            </div>
-          </div>
-        `);
-      }
+      // still waiting → do NOTHING (screen already visible)
     });
 }
-
 
 
         function isQuizDone() {
@@ -495,7 +494,7 @@ document.addEventListener("keydown", e => {
         elements.confirm.click();
     }
 });
-    startVerificationListener();
+    startVerificationListener(); 
     </script>
 </body>
 </html>
