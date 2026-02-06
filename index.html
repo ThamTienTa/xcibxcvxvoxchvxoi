@@ -106,46 +106,70 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+             // HELPERS
+        function normalize(str) {
+            return str
+                ? str.normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/đ/g, "d")
+                    .toLowerCase()
+                    .replace(/\s+/g, "") // 🔥 THIS LINE
+                    .trim()
+                : "";
+        }
+
+        function isQuizDone() {
+            return localStorage.getItem("quizDone") === "true";
+        }
         // AUTO REDIRECT IF VERIFIED
 const savedName = localStorage.getItem("studentName");
+const quizDone = localStorage.getItem("quizDone") === "true";
 
-if (savedName) {
-    db.collection("submissions")
-      .where("name", "==", savedName)
-      .where("verified", "==", true)
-      .limit(1)
-      .get()
-      .then(snap => {
-          if (!snap.empty) {
-              window.location.href =
-                "https://thamtienta.github.io/7A7-thcsbk/main";
-          }
-      });
-}
+if (savedName && quizDone) {
+  db.collection("submissions")
+    .where("nameKey", "==", normalize(savedName))
+    .limit(1)
+    .get()
+    .then(snap => {
+      // ❌ Not found in Firebase → RESET
+      if (snap.empty) {
+        localStorage.removeItem("studentName");
+        localStorage.removeItem("quizDone");
+        location.reload();
+        return;
+      }
 
+      const data = snap.docs[0].data();
 
-        if (isQuizDone()) {
-    document.body.innerHTML = `
+      // ✅ Verified → GO MAIN
+      if (data.verified === true) {
+        window.location.href =
+          "https://thamtienta.github.io/7A7-thcsbk/main";
+        return;
+      }
+
+      // ⏳ Not verified → BLOCK PAGE
+      document.body.innerHTML = `
         <div style="
-            min-height:100vh;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            background:#050f0a;
-            color:white;
-            font-family:Manrope;
-            text-align:center;
+          min-height:100vh;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          background:#050f0a;
+          color:white;
+          font-family:Manrope;
+          text-align:center;
         ">
-            <div>
-                <h1>⏳ Tài khoản của bạn chưa được xác minh</h1>
-                <p style="opacity:.6;margin-top:10px;">
-                    Vui lòng chờ admin xác nhận
-                </p>
-            </div>
+          <div>
+            <h1>⏳ Tài khoản của bạn chưa được xác minh</h1>
+            <p style="opacity:.6;margin-top:10px;">
+              Vui lòng chờ admin xác nhận
+            </p>
+          </div>
         </div>
-    `;
+      `;
+    });
 }
-
 
         // QUESTIONS (moved up to fix ReferenceError)
         const questions = [
@@ -236,6 +260,7 @@ if (savedName) {
         let score = 0;
         let studentName = "";
         let responses = [];
+        
 
         // ELEMENTS
         const elements = {
@@ -255,17 +280,6 @@ if (savedName) {
             content: document.getElementById("adminContent")
         };
 
-        // HELPERS
-        function normalize(str) {
-            return str
-                ? str.normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-                    .replace(/đ/g, "d")
-                    .toLowerCase()
-                    .replace(/\s+/g, "") // 🔥 THIS LINE
-                    .trim()
-                : "";
-        }
 
         function teacherAnswerOk(val) {
             const n = normalize(val);
@@ -423,6 +437,8 @@ else if (q.type === "input") {
         }
 
 function finish() {
+localStorage.setItem("studentName", studentName);
+localStorage.setItem("quizDone", "true");
     markQuizDone(); // ✅ SAVE ONLY HERE
 
     elements.quiz.innerHTML = `
@@ -432,17 +448,16 @@ function finish() {
                 Đang chờ xác minh từ admin
             </p>
         </div>
-    `;
+    `};
 
-    db.collection("submissions").add({
-        name: studentName,
-        score: `${score}/5`,
-        answers: responses,
-        verified: false,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-}
-
+db.collection("submissions").add({
+  name: studentName,
+  nameKey: normalize(studentName), // 🔥 REQUIRED
+  score: `${score}/5`,
+  answers: responses,
+  verified: false,
+  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+});
 
         // ENTER KEY FUNCTIONALITY
         document.addEventListener("keydown", e=>{
