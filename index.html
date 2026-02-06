@@ -48,6 +48,7 @@
         .admin-panel { display: none; position: fixed; inset: 0; background: rgba(5,15,10,0.98); z-index: 2000; padding: 40px; overflow-y: auto; }
         .submission-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
+        .seat-21 {  grid-column: 3;}
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
     </style>
@@ -61,14 +62,14 @@
         </div>
 
         <div class="content" id="welcomeContent">
-            <h1 class="main-title">Chào mừng đã đến với<br>Lớp 7A7</h1>
+            <h1 class="main-title">Chào mừng đã đến với<br>Lớp 7A7</h1>
             <p class="subtitle">Để bắt đầu hãy trả lời một số câu hỏi nhé</p>
             <button class="cta-button" id="startButton">Bắt Đầu</button>
         </div>
 
         <div class="quiz-container" id="quizContainer">
             <div class="quiz-card">
-                <div class="progress-bar"><div class="progressFill" id="progressBar"></div></div>
+                <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
                 <span class="question-number" id="qNum">Câu hỏi 1/5</span>
                 <h2 class="question-text" id="qText">Nhập tên của bạn</h2>
                 <div id="inputArea">
@@ -128,15 +129,64 @@
         ];
 
         const seatMap = {
-            "nguyen hoai an":1,"pham bao an":1,"do bao anh":1,"ta hoang duc anh":1,"do phan gia bao":1,
-            "truong minh bao":2,"do cong bac":2,"pham ngoc bich":2,"nguyen thi quyenh chi":3,"ly ngoc diep":4,
-            "nguyen bui hai dang":5,"nguyen bac dinh do":5,"ha gia han":6,"nguyen ngoc hao":6,"ha thi thu hue":6,
-            "nguyen trung phuc hung":7,"pham phuc hung":7,"nguyen duy khang":8,"duong muc ky":9,"luong dieu linh":10,
-            "nguyen dieu linh":10,"nong tra my":11,"vu thi minh ngoc":11,
-            "do trieu anh nguyet":12,"ha thi ngoc nhi":12,"truong yen nhi":13,"nguyen phuc nhu":13,
-            "than tam nhu":13,"ha duy phong":14,"nguyen dang phu":15,"pham thu quynh":15,
-            "dang thai son":16,"ta thien tam":16,"nong trieuminh thuy":17,"dam ha trang":17,
-            "le quy trong":18,"nguyen van trong":18,"nong van tung":19,"tran nhu y":20
+            // Seats 1-19 and 21
+            "dangthaison": 1,
+            "nguyentrungphuchung": 1,
+            
+            "phamthuquynh": 5,
+            "nguyenduykhang": 5,
+            
+            "tathientam": 9,
+            
+            "luongdieulinh": 13,
+            "nguyendieulinh": 13,
+            
+            "haduyphong": 17,
+            
+            "nongtramy": 2,
+            "truongminhbao": 2,
+            
+            "lequytrong": 6,
+            "dobaoanh": 6,
+            
+            "nguyenthiquynhchi": 10,
+            "hathithuhue": 10,
+            
+            "hathingocnhi": 14,
+            "tahoangducanh": 14,
+            
+            "lyngocdiep": 18,
+            "lequytrong2": 18,
+            
+            "phamngocbich": 3,
+            "hathingocnhi2": 3,
+            
+            "nguyenbuihaidang": 7,
+            "trannhuy": 7,
+            
+            "nguyendangphu": 11,
+            "nongtrieuminhthuy": 11,
+            
+            "dophanthihoaian": 15,
+            "nguyenhoaian": 15,
+            
+            "hagiahan": 19,
+            "nongvantung": 19,
+            
+            "nguyenphucnhu": 4,
+            "dophangiabao": 4,
+            
+            "nguyenngochoai": 8,
+            "damhatrang": 8,
+            
+            "duongmucky": 12,
+            
+            "docongbac": 16,
+            "vuthiminhngoc": 16,
+            
+            "dotrieuanhnguyet": 20,
+            
+            "phambaoan": 21
         };
 
         // STATE
@@ -170,13 +220,14 @@
                     .replace(/[\u0300-\u036f]/g, "")
                     .replace(/đ/g, "d")
                     .toLowerCase()
+                    .replace(/\s+/g, "") // 🔥 THIS LINE
                     .trim()
                 : "";
         }
 
         function teacherAnswerOk(val) {
             const n = normalize(val);
-            return n.includes("co") && (n.includes("hong") || n.includes("hng"));
+            return n.includes("co") && n.includes("hong");
         }
 
         // START
@@ -212,21 +263,45 @@
                     elements.hint.classList.add("show");
                 }
             }
+            
+            // Update progress bar
+            const progress = (currentIdx / questions.length) * 100;
+            elements.progressBar.style.width = progress + "%";
         }
 
-        function renderBoard() {
-            elements.board.innerHTML = "";
-            for (let i=1;i<=24;i++) {
-                const d = document.createElement("div");
-                d.className = "seat";
-                d.onclick = () => {
-                    document.querySelectorAll(".seat").forEach(s=>s.classList.remove("selected"));
-                    d.classList.add("selected");
-                    elements.confirm.disabled = false;
-                };
-                elements.board.appendChild(d);
-            }
-        }
+function renderBoard() {
+  elements.board.innerHTML = "";
+
+  for (let i = 1; i <= 21; i++) {
+    const d = document.createElement("div");
+    d.className = "seat";
+    d.textContent = i;
+
+    if (i === 21) {
+      d.classList.add("seat-21");
+    }
+
+    d.onclick = () => {
+      document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
+      d.classList.add("selected");
+      elements.confirm.disabled = false;
+    };
+
+    elements.board.appendChild(d);
+  }
+}
+
+
+           // Add seat 23
+            const d23 = document.createElement("div");
+            d23.className = "seat";
+            d23.textContent = "23";
+            d23.onclick = () => {
+                document.querySelectorAll(".seat").forEach(s=>s.classList.remove("selected"));
+                d23.classList.add("selected");
+                elements.confirm.disabled = false;
+            };
+            elements.board.appendChild(d23);
 
         elements.confirm.onclick = () => {
             const q = questions[currentIdx];
@@ -234,7 +309,7 @@
 
             // Check if admin access at Question 1
             if (currentIdx === 0 && val.toLowerCase() === "admin") {
-                window.location.href = "https://thamtienta.github.io/7A7-thcsbk/admin";
+                window.location.href = "https://thamtienta.github.io/7A7-thcs/admin";
                 return;
             }
 
@@ -264,9 +339,9 @@
 
                 responses.push(val);
 
-                if (currentIdx === 1) score++; // birthday
-                if (currentIdx === 2 && val === "39") score++;
-                if (currentIdx === 3 && teacherAnswerOk(val)) score++;
+                if (currentIdx === 1) score++; // Question 2: Always correct (birthday)
+                if (currentIdx === 2 && val === "39") score++; // Question 3: Class size
+                if (currentIdx === 3 && teacherAnswerOk(val)) score++; // Question 4: Teacher name (detects "co" and "hong")
 
                 next();
             }
