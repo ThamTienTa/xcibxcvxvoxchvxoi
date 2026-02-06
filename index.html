@@ -119,7 +119,7 @@
             "Nguyễn Hoài An","Phạm Bảo An","Đỗ Bảo Anh","Tạ Hoàng Đức Anh","Đỗ Phan Gia Bảo",
             "Trương Minh Bảo","Đỗ Công Bắc","Phạm Ngọc Bích","Nguyễn Thị Quỳnh Chi",
             "Lý Ngọc Diệp","Nguyễn Bùi Hải Đăng","Nguyễn Bắc Đình Độ","Hà Gia Hân",
-            "Nguyễn Ngọc Hạo","Hà Thị Thu Huệ","Nguyễn Trung Phúc Hưng",
+            "Nguyễn Ngọc Hạo","Hà Thị Thu Huệ","Nguyễn Trung Phúc Hưng","Phạm Phúc Hưng",
             "Nguyễn Duy Khang","Dương Mộc Kỳ","Lương Diệu Linh","Nguyễn Diệu Linh",
             "Nông Trà My","Vũ Thị Minh Ngọc","Đỗ Triệu Anh Nguyệt","Hà Thị Ngọc Nhi",
             "Trương Yến Nhi","Nguyễn Phúc Như","Thân Tâm Như","Hà Duy Phong",
@@ -129,64 +129,7 @@
         ];
 
         const seatMap = {
-            // Seats 1-19 and 21
-            "dangthaison": 1,
-            "nguyentrungphuchung": 1,
-            
-            "phamthuquynh": 5,
-            "nguyenduykhang": 5,
-            
-            "tathientam": 9,
-            
-            "luongdieulinh": 13,
-            "nguyendieulinh": 13,
-            
-            "haduyphong": 17,
-            
-            "nongtramy": 2,
-            "truongminhbao": 2,
-            
-            "lequytrong": 6,
-            "dobaoanh": 6,
-            
-            "nguyenthiquynhchi": 10,
-            "hathithuhue": 10,
-            
-            "hathingocnhi": 14,
-            "tahoangducanh": 14,
-            
-            "lyngocdiep": 18,
-            "lequytrong2": 18,
-            
-            "phamngocbich": 3,
-            "hathingocnhi2": 3,
-            
-            "nguyenbuihaidang": 7,
-            "trannhuy": 7,
-            
-            "nguyendangphu": 11,
-            "nongtrieuminhthuy": 11,
-            
-            "dophanthihoaian": 15,
-            "nguyenhoaian": 15,
-            
-            "hagiahan": 19,
-            "nongvantung": 19,
-            
-            "nguyenphucnhu": 4,
-            "dophangiabao": 4,
-            
-            "nguyenngochoai": 8,
-            "damhatrang": 8,
-            
-            "duongmucky": 12,
-            
-            "docongbac": 16,
-            "vuthiminhngoc": 16,
-            
-            "dotrieuanhnguyet": 20,
-            
-            "phambaoan": 21
+            "phambaon": 23
         };
 
         // STATE
@@ -269,30 +212,28 @@
             elements.progressBar.style.width = progress + "%";
         }
 
-function renderBoard() {
-  elements.board.innerHTML = "";
+        function renderBoard() {
+            elements.board.innerHTML = "";
 
-  for (let i = 1; i <= 21; i++) {
-    const d = document.createElement("div");
-    d.className = "seat";
-    d.textContent = i;
+            for (let i = 1; i <= 21; i++) {
+                const d = document.createElement("div");
+                d.className = "seat";
+                d.textContent = i;
 
-    if (i === 21) {
-      d.classList.add("seat-21");
-    }
+                if (i === 21) {
+                    d.classList.add("seat-21");
+                }
 
-    d.onclick = () => {
-      document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
-      d.classList.add("selected");
-      elements.confirm.disabled = false;
-    };
+                d.onclick = () => {
+                    document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
+                    d.classList.add("selected");
+                    elements.confirm.disabled = false;
+                };
 
-    elements.board.appendChild(d);
-  }
-}
+                elements.board.appendChild(d);
+            }
 
-
-           // Add seat 23
+            // Add seat 23
             const d23 = document.createElement("div");
             d23.className = "seat";
             d23.textContent = "23";
@@ -302,6 +243,7 @@ function renderBoard() {
                 elements.confirm.disabled = false;
             };
             elements.board.appendChild(d23);
+        }
 
         elements.confirm.onclick = () => {
             const q = questions[currentIdx];
@@ -327,7 +269,18 @@ function renderBoard() {
                     studentName = val;
                     responses.push(val);
                     score++;
-                    next();
+                    
+                    // Special message for Phạm Phúc Hưng
+                    if (normalize(val) === "phamphuchung") {
+                        elements.error.innerText = "Đù má cái gì vậy, dell đùa";
+                        elements.error.classList.add("show");
+                        setTimeout(() => {
+                            elements.error.classList.remove("show");
+                            next();
+                        }, 2000);
+                    } else {
+                        next();
+                    }
                 } else {
                     elements.error.innerText = "Tên không có trong danh sách!";
                     elements.error.classList.add("show");
