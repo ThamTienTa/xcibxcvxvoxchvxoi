@@ -105,7 +105,6 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
 // HELPERS
 function normalize(str) {
   return str
@@ -119,56 +118,56 @@ function normalize(str) {
 }
 
         // ========= STUDENT VERIFICATION GATE =========
-const savedName = localStorage.getItem("studentName");
-const quizDone = localStorage.getItem("quizDone") === "true";
+function startVerificationListener() {
+  const savedName = localStorage.getItem("studentName");
+  const quizDone = localStorage.getItem("quizDone") === "true";
+  const submitted = localStorage.getItem("submitted") === "true";
 
-if (savedName && quizDone && localStorage.getItem("submitted") === "true") {
+  if (!savedName || !quizDone || !submitted) return;
+
   db.collection("submissions")
     .where("nameKey", "==", normalize(savedName))
     .orderBy("createdAtClient", "desc")
     .limit(1)
     .onSnapshot(snap => {
 
-      // ❌ No submission → reset
       if (snap.empty) {
-        localStorage.removeItem("studentName");
-        localStorage.removeItem("quizDone");
-        localStorage.removeItem("submitted");
-        location.reload();
+        console.log("⏳ Waiting for submission to appear");
         return;
       }
 
       const data = snap.docs[0].data();
+      console.log("📦 LISTEN:", data);
 
-      // ✅ VERIFIED → TELEPORT
       if (data.verified === true) {
+        console.log("✅ VERIFIED → TELEPORT");
         window.location.href =
           "https://thamtienta.github.io/7A7-thcsbk/main";
         return;
       }
 
-      // ⏳ NOT VERIFIED → BLOCK (BUG #2 FIXED ✅)
-      document.body.innerHTML = `
-        <div style="
-          min-height:100vh;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          background:#050f0a;
-          color:white;
-          font-family:Manrope;
-          text-align:center;
-        ">
-          <div>
-            <h1>⏳ Chờ xác minh danh tính</h1>
-            <p style="opacity:.6;margin-top:10px;">
-              Vui lòng chờ admin xác nhận
-            </p>
+      if (!document.getElementById("waitingScreen")) {
+        document.body.insertAdjacentHTML("beforeend", `
+          <div id="waitingScreen" style="
+            position:fixed;
+            inset:0;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:#050f0a;
+            color:white;
+            z-index:9999;
+          ">
+            <div style="text-align:center;">
+              <h1>⏳ Chờ xác minh danh tính</h1>
+              <p style="opacity:.6;">Vui lòng chờ admin xác nhận</p>
+            </div>
           </div>
-        </div>
-      `;
+        `);
+      }
     });
 }
+
 
 
         function isQuizDone() {
@@ -455,21 +454,29 @@ function markQuizDone() {
 }
 
 function finish() {
-  localStorage.setItem("submitted", "true"); // 🔒 LOCK
-  markQuizDone();
-  localStorage.setItem("studentName", studentName);
-
   saveSubmission();
 
-  elements.quiz.innerHTML = `
+  localStorage.setItem("submitted", "true");
+  localStorage.setItem("quizDone", "true");
+  localStorage.setItem("studentName", studentName);
+
+  elements.quiz.style.display = "none";
+
+  document.body.insertAdjacentHTML("beforeend", `
     <div class="quiz-card">
       <h1>🎉 Kết quả: ${score}/5</h1>
       <p style="margin-top:20px; opacity:.7;">
         Đang chờ xác minh từ admin
       </p>
     </div>
-  `;
+  `);
+
+  startVerificationListener();
 }
+
+
+
+
 
         function next() {
             currentIdx++;
@@ -488,6 +495,7 @@ document.addEventListener("keydown", e => {
         elements.confirm.click();
     }
 });
+    startVerificationListener();
     </script>
 </body>
 </html>
