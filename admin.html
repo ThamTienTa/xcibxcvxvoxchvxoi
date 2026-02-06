@@ -432,41 +432,44 @@ else if (q.type === "input") {
             }
         };
 
+function finish() {
+    elements.welcome.classList.add("hidden");
+    elements.quiz.style.display = "block";
+  localStorage.setItem("quizDone", "true");
+
+  // show result UI
+  elements.quiz.innerHTML = `
+    <div class="quiz-card">
+      <h1>🎉 Kết quả: ${score}/5</h1>
+      <p style="margin-top:20px; opacity:.7;">
+        Đang chờ xác minh từ admin
+      </p>
+    </div>
+  `;
+
+  // prevent double save
+  if (localStorage.getItem("quizSaved")) return;
+  localStorage.setItem("quizSaved", "true");
+
+  // save to Firebase
+  db.collection("submissions").add({
+    name: studentName,
+    nameKey: normalize(studentName),
+    score: `${score}/5`,
+    answers: responses,
+    verified: false,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .then(() => console.log("✅ Saved correctly"))
+  .catch(err => console.error("❌ Firestore error:", err));
+}
+
+
         function next() {
             currentIdx++;
             if (currentIdx < questions.length) loadQuestion();
             else finish();
         }
-
-function finish() {
-    // 🚫 STOP blank / early submits
-    if (!studentName || responses.length !== questions.length) {
-        console.warn("Blocked blank submission");
-        return;
-    }
-
-    localStorage.setItem("quizDone", "true");
-
-    db.collection("submissions").add({
-        name: studentName,
-        nameKey: normalize(studentName),
-        score: `${score}/5`,
-        answers: responses,
-        verified: false,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    elements.quiz.innerHTML = `
-        <div class="quiz-card">
-            <h1>🎉 Kết quả: ${score}/5</h1>
-            <p style="margin-top:20px; opacity:.7;">
-                Đang chờ xác minh từ admin
-            </p>
-        </div>
-    `;
-}
-
-
 
 document.addEventListener("keydown", e => {
     if (e.key === "Enter") {
@@ -479,21 +482,6 @@ document.addEventListener("keydown", e => {
         elements.confirm.click();
     }
 });
-
-
-        function markQuizDone() {
-            localStorage.setItem("quizDone", "true");
-        }
-
-        function isQuizDone() {
-            return localStorage.getItem("quizDone") === "true";
-        }
-
-        function clearQuizDone() {
-            localStorage.removeItem("quizDone");
-        }
-
     </script>
 </body>
 </html>
-
