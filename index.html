@@ -106,50 +106,48 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-             // HELPERS
-        function normalize(str) {
-            return str
-                ? str.normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-                    .replace(/đ/g, "d")
-                    .toLowerCase()
-                    .replace(/\s+/g, "") // 🔥 THIS LINE
-                    .trim()
-                : "";
-        }
+// HELPERS
+function normalize(str) {
+  return str
+    ? str.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .trim()
+    : "";
+}
 
-        function isQuizDone() {
-            return localStorage.getItem("quizDone") === "true";
-        }
-        // AUTO REDIRECT IF VERIFIED
+        // ========= STUDENT VERIFICATION GATE =========
 const savedName = localStorage.getItem("studentName");
 const quizDone = localStorage.getItem("quizDone") === "true";
 
-if (savedName && quizDone) {
+if (savedName && quizDone && localStorage.getItem("submitted") === "true") {
   db.collection("submissions")
     .where("nameKey", "==", normalize(savedName))
     .orderBy("createdAtClient", "desc")
     .limit(1)
     .onSnapshot(snap => {
-      // ❌ No submission found → RESET
+
+      // ❌ No submission → reset
       if (snap.empty) {
         localStorage.removeItem("studentName");
         localStorage.removeItem("quizDone");
         localStorage.removeItem("submitted");
-        setTimeout(() => location.reload(), 300);
+        location.reload();
         return;
       }
 
       const data = snap.docs[0].data();
 
-      // ✅ Verified → GO MAIN
+      // ✅ VERIFIED → TELEPORT
       if (data.verified === true) {
         window.location.href =
           "https://thamtienta.github.io/7A7-thcsbk/main";
         return;
       }
 
-      // ⏳ Not verified → BLOCK PAGE
+      // ⏳ NOT VERIFIED → BLOCK (BUG #2 FIXED ✅)
       document.body.innerHTML = `
         <div style="
           min-height:100vh;
@@ -162,7 +160,7 @@ if (savedName && quizDone) {
           text-align:center;
         ">
           <div>
-            <h1>⏳ Tài khoản của bạn chưa được xác minh</h1>
+            <h1>⏳ Chờ xác minh danh tính</h1>
             <p style="opacity:.6;margin-top:10px;">
               Vui lòng chờ admin xác nhận
             </p>
@@ -171,6 +169,11 @@ if (savedName && quizDone) {
       `;
     });
 }
+
+
+        function isQuizDone() {
+            return localStorage.getItem("quizDone") === "true";
+        }
 
         // QUESTIONS (moved up to fix ReferenceError)
         const questions = [
@@ -452,11 +455,11 @@ function markQuizDone() {
 }
 
 function finish() {
+  localStorage.setItem("submitted", "true"); // 🔒 LOCK
   markQuizDone();
-
   localStorage.setItem("studentName", studentName);
 
-  saveSubmission(); // 🔥🔥🔥 THIS WAS MISSING
+  saveSubmission();
 
   elements.quiz.innerHTML = `
     <div class="quiz-card">
