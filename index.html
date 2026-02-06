@@ -453,13 +453,16 @@ function finish() {
         });
 
         function markQuizDone() {
-            localStorage.setItem("quizDone", "false");
+            localStorage.setItem("quizDone", "true");
         }
 
         function isQuizDone() {
-            return localStorage.getItem("quizDone") === "false";
+            return localStorage.getItem("quizDone") === "true";
         }
 
+        function clearQuizDone() {
+            localStorage.removeItem("quizDone");
+        }
 
     </script>
 </body>
