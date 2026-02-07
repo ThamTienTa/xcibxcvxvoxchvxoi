@@ -33,26 +33,49 @@
         .question-number { display: inline-block; background: #07FAA3; color: #050f0a; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 700; margin-bottom: 30px; }
         .question-text { font-size: clamp(24px, 4vw, 36px); font-weight: 700; margin-bottom: 50px; }
         .input-container { margin: 40px 0; }
-        .name-input { width: 100%; padding: 20px 30px; font-size: 20px; color: #ffffff; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 16px; outline: none; }
-        .error-message { color: #ff4444; margin-top: 10px; display: none; }
+        .name-input { width: 100%; padding: 20px 30px; font-size: 20px; color: #ffffff; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 16px; outline: none; font-family: 'Manrope', sans-serif; }
+        .name-input:focus { border-color: #07FAA3; }
+        .error-message { color: #ff4444; margin-top: 10px; display: none; font-size: 14px; }
         .error-message.show { display: block; }
         .hint-text { color: rgba(255, 255, 255, 0.4); font-size: 14px; margin-top: 10px; font-style: italic; display: none; }
         .hint-text.show { display: block; }
         .board-container { margin: 20px auto; max-width: 800px; }
         .board-header { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; color: #07FAA3; font-weight: 800; font-size: 18px; }
         .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .seat { background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; cursor: pointer !important; transition: all 0.3s ease; font-weight: 700; min-height: 60px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 60; }
-        .seat:hover { background: rgba(7, 250, 163, 0.1); border-color: #07FAA3; }
-        .seat.selected { background: rgba(7, 250, 163, 0.2); border-color: #07FAA3; }
-        .admin-btn { position: fixed; top: 20px; right: 20px; padding: 10px 25px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; z-index: 1000; }
-        .admin-panel { display: none; position: fixed; inset: 0; background: rgba(5,15,10,0.98); z-index: 2000; padding: 40px; overflow-y: auto; }
-        .submission-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .seat { background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.3s ease; font-weight: 700; min-height: 60px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 60; }
+        .seat:hover { background: rgba(7, 250, 163, 0.1); border-color: #07FAA3; transform: scale(1.05); }
+        .seat.selected { background: rgba(7, 250, 163, 0.2); border-color: #07FAA3; box-shadow: 0 0 20px rgba(7, 250, 163, 0.3); }
+        .seat-21 { grid-column: 3; }
         .hidden { display: none !important; }
-        .seat-21 {  grid-column: 3;}
+        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #07FAA3; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+        
+        .waiting-screen { 
+            position: fixed; 
+            inset: 0; 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            background: #050f0a; 
+            color: white; 
+            font-family: Manrope; 
+            text-align: center; 
+            z-index: 9999;
+            flex-direction: column;
+        }
+        .waiting-screen h1 { font-size: clamp(24px, 5vw, 48px); margin-bottom: 20px; }
+        .waiting-screen p { opacity: 0.6; margin-top: 10px; font-size: 18px; }
 
-</style>
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .seat { min-height: 50px; padding: 15px; font-size: 14px; }
+            .board { gap: 8px; }
+            .quiz-card { padding: 30px 20px; }
+            .name-input { font-size: 16px; /* Prevents zoom on iOS */ }
+        }
+    </style>
 </head>
 <body>
 
@@ -89,30 +112,19 @@
                 <button class="submit-answer-btn" id="confirmBtn">Xác Nhận</button>
             </div>
         </div>
-        <div id="waitingScreen" style="
-  position:fixed;
-  inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:#050f0a;
-  color:white;
-  font-family:Manrope;
-  text-align:center;
-  z-index:9999;
-">
-  <div>
-    <h1>⏳ Đang chờ admin confirming</h1>
-    <p style="opacity:.6;margin-top:10px;">
-      Quay lại sau khoảng 12 giờ đến 1 ngày
-    </p>
-  </div>
-</div>
+
+        <div class="waiting-screen" id="waitingScreen">
+            <div>
+                <h1>⏳ Đang chờ xác nhận từ admin</h1>
+                <p>Bạn sẽ được chuyển trang tự động khi được duyệt</p>
+                <div class="loading-spinner" style="margin-top: 30px;"></div>
+            </div>
+        </div>
 
     </section>
 
     <script>
-        // FIREBASE CONFIG
+        // FIREBASE CONFIG - Keep these keys, they're OK for client-side with Security Rules
         const firebaseConfig = {
             apiKey: "AIzaSyBx6YfJDocmt-WJQvsaKnaUEA_JohxdfC0",
             authDomain: "a7-thcsbk.firebaseapp.com",
@@ -125,64 +137,95 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-// HELPERS
-function normalize(str) {
-  return str
-    ? str.normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/đ/g, "d")
-        .toLowerCase()
-        .replace(/\s+/g, "")
-        .trim()
-    : "";
-}
 
-        // ========= STUDENT VERIFICATION GATE =========
-function startVerificationListener() {
-  const waiting = document.getElementById("waitingScreen");
-
-  const savedName = localStorage.getItem("studentName");
-  const quizDone = localStorage.getItem("quizDone") === "true";
-  const submitted = localStorage.getItem("submitted") === "true";
-
-  if (!savedName || !quizDone || !submitted) {
-    waiting.style.display = "none";
-    return;
-  }
-
-  waiting.style.display = "flex"; // show only when needed
-
-  db.collection("submissions")
-    .where("nameKey", "==", normalize(savedName))
-    .orderBy("createdAtClient", "desc")
-    .limit(1)
-    .onSnapshot(snap => {
-
-      if (snap.empty) return;
-
-      const data = snap.docs[0].data();
-
-      if (data.verified === true) {
-  localStorage.clear(); // reset state
-  window.location.href =
-    "https://thamtienta.github.io/7A7-thcsbk/main";
-  return;
-}
-
-
-      // still waiting → do NOTHING (screen already visible)
-    });
-}
-
-
-        function isQuizDone() {
-            return localStorage.getItem("quizDone") === "true";
+        // HELPERS
+        function normalize(str) {
+            return str
+                ? str.normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/đ/g, "d")
+                    .toLowerCase()
+                    .replace(/\s+/g, "")
+                    .trim()
+                : "";
         }
 
-        // QUESTIONS (moved up to fix ReferenceError)
+        function sanitizeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function resetUser() {
+            if (unsubscribeListener) {
+                unsubscribeListener();
+                unsubscribeListener = null;
+            }
+
+            localStorage.clear();
+            studentName = "";
+            currentIdx = 0;
+            responses = [];
+            score = 0;
+
+            document.getElementById("waitingScreen").style.display = "none";
+            elements.quiz.style.display = "none";
+            elements.welcome.classList.remove("hidden");
+            elements.progressBar.style.width = "0%";
+        }
+
+        // VERIFICATION LISTENER
+        let unsubscribeListener = null;
+
+        function startVerificationListener() {
+            if (unsubscribeListener) {
+                unsubscribeListener();
+                unsubscribeListener = null;
+            }
+
+            const savedName = localStorage.getItem("studentName");
+            if (!savedName) return;
+
+            const waitingScreen = document.getElementById("waitingScreen");
+            const nameKey = normalize(savedName);
+
+            unsubscribeListener = db.collection("submissions")
+                .doc(nameKey)
+                .onSnapshot(doc => {
+                    if (!doc.exists) {
+                        console.log("Record deleted → reset user");
+                        resetUser();
+                        return;
+                    }
+
+                    const data = doc.data();
+
+                    if (data.verified === true) {
+                        if (unsubscribeListener) {
+                            unsubscribeListener();
+                            unsubscribeListener = null;
+                        }
+                        localStorage.clear();
+                        window.location.href = "main.html";
+                        return;
+                    }
+
+                    if (localStorage.getItem("submitted") === "true") {
+                        elements.welcome.classList.add("hidden");
+                        elements.quiz.style.display = "none";
+                        waitingScreen.style.display = "flex";
+                    }
+                }, error => {
+                    console.error("Listener error:", error);
+                    elements.error.innerText = "Lỗi kết nối. Vui lòng thử lại sau.";
+                    elements.error.classList.add("show");
+                });
+        }
+
+        // QUESTIONS
         const questions = [
             { text: "Nhập tên của bạn để xác nhận", type: "name", hint: "Tên đầy đủ của bạn" },
-            { text: "Ngày, tháng, năm sinh?", type: "input", hint: "vd: 01/01/2013" },
+            { text: "Ngày, tháng, năm sinh?", type: "input", hint: "vd: 01/01/2013 hoặc 1/1/2013" },
             { text: "Lớp 7A7 có bao nhiêu học sinh?", type: "input", hint: "Số lượng học sinh" },
             { text: "Cô chủ nhiệm lớp 7A7 là ai?", type: "input", hint: "Tên cô giáo" },
             { text: "Bạn ngồi chỗ nào?", type: "board", hint: "Chọn vị trí của bạn" }
@@ -203,63 +246,15 @@ function startVerificationListener() {
         ];
 
         const seatMap = {
-            // Seats 1-19 and 21
-            "dangthaison": 1,
-            "nguyentrungphuchung": 1,
-            
-            "phamthuquynh": 5,
-            "nguyenduykhang": 5,
-            
-            "tathientam": 9,
-            
-            "luongdieulinh": 13,
-            "nguyendieulinh": 13,
-            
-            "haduyphong": 17,
-            
-            "nongtramy": 2,
-            "truongminhbao": 2,
-            
-            "lequytrong": 6,
-            "dobaoanh": 6,
-            
-            "nguyenthiquynhchi": 10,
-            "hathithuhue": 10,
-            
-            "hathingocnhi": 14,
-            "tahoangducanh": 14,
-            
-            "lyngocdiep": 18,
-            "lequytrong2": 18,
-            
-            "phamngocbich": 3,
-            "hathingocnhi2": 3,
-            
-            "nguyenbuihaidang": 7,
-            "trannhuy": 7,
-            
-            "nguyendangphu": 11,
-            "nongtrieuminhthuy": 11,
-            
-            "dophanthihoaian": 15,
-            "nguyenhoaian": 15,
-            
-            "hagiahan": 19,
-            "nongvantung": 19,
-            
-            "nguyenphucnhu": 4,
-            "dophangiabao": 4,
-            
-            "nguyenngochoai": 8,
-            "damhatrang": 8,
-            
-            "duongmucky": 12,
-            
-            "docongbac": 16,
-            "vuthiminhngoc": 16,
-            
-            "dotrieuanhnguyet": 20,
-            
+            "dangthaison": 1, "nguyentrungphuchung": 1, "phamthuquynh": 5, "nguyenduykhang": 5,
+            "tathientam": 9, "luongdieulinh": 13, "nguyendieulinh": 13, "haduyphong": 17,
+            "nongtramy": 2, "truongminhbao": 2, "nguyenvantrong": 6, "dobaoanh": 6,
+            "nguyenthiquynhchi": 10, "hathithuhue": 10, "truongyennhi": 14, "tahoangducanh": 14,
+            "lyngocdiep": 18, "lequytrong": 18, "phamngocbich": 3, "hathingocnhi": 3,
+            "nguyenbuihaidang": 7, "trannhuy": 7, "nguyendangphu": 11, "nongtrieuminhthuy": 11,
+            "dophanthihoaian": 15, "nguyenhoaian": 15, "hagiahan": 19, "nongvantung": 19,
+            "nguyenphucnhu": 4, "dophangiabao": 4, "nguyenngochoai": 8, "damhatrang": 8,
+            "duongmucky": 12, "docongbac": 16, "vuthiminhngoc": 16, "dotrieuanhnguyet": 20,
             "phambaoan": 21
         };
 
@@ -268,7 +263,7 @@ function startVerificationListener() {
         let score = 0;
         let studentName = "";
         let responses = [];
-        
+        let isSubmitting = false;
 
         // ELEMENTS
         const elements = {
@@ -283,15 +278,24 @@ function startVerificationListener() {
             error: document.getElementById("errorMsg"),
             hint: document.getElementById("hintText"),
             confirm: document.getElementById("confirmBtn"),
-            board: document.getElementById("seatingBoard"),
-            admin: document.getElementById("adminPanel"),
-            content: document.getElementById("adminContent")
+            board: document.getElementById("seatingBoard")
         };
-
 
         function teacherAnswerOk(val) {
             const n = normalize(val);
             return n.includes("co") && n.includes("hong");
+        }
+
+        function isValidDateDMY(val) {
+            // Accept both DD/MM/YYYY and D/M/YYYY formats
+            if (!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val)) return false;
+
+            const [d, m, y] = val.split("/").map(Number);
+            if (y < 2012 || y > 2014) return false;
+            if (m < 1 || m > 12) return false;
+
+            const daysInMonth = new Date(y, m, 0).getDate();
+            return d >= 1 && d <= daysInMonth;
         }
 
         // START
@@ -301,21 +305,10 @@ function startVerificationListener() {
             loadQuestion();
         };
 
-function isValidDateDMY(val) {
-  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(val)) return false;
-
-  const [d, m, y] = val.split("/").map(Number);
-  if (y < 2012 || y > 2014) return false;
-  if (m < 1 || m > 12) return false;
-
-  const daysInMonth = new Date(y, m, 0).getDate();
-  return d >= 1 && d <= daysInMonth;
-}
-
-        
         // QUIZ
         function loadQuestion() {
-            elements.confirm.disabled = false; // FIX #2: Ensure button is enabled
+            elements.confirm.disabled = false;
+            isSubmitting = false;
 
             const q = questions[currentIdx];
             elements.qNum.innerText = `Câu hỏi ${currentIdx+1}/${questions.length}`;
@@ -339,19 +332,17 @@ function isValidDateDMY(val) {
                     elements.hint.classList.add("show");
                 }
             }
-            
-            // Update progress bar
-            const progress = (currentIdx / questions.length) * 100;
+
+            const progress = ((currentIdx + 1) / questions.length) * 100;
             elements.progressBar.style.width = progress + "%";
         }
 
         function renderBoard() {
             elements.board.innerHTML = "";
-            // Create 21 seats total (1-21) with seat 21 appearing after seat 19 in the grid
-            for (let i=1;i<=21;i++) {
+            for (let i=1; i<=21; i++) {
                 const d = document.createElement("div");
                 d.className = "seat";
-                d.textContent = i; // Display the seat number
+                d.textContent = i;
                 if (i === 21) {
                     d.classList.add("seat-21");
                 }
@@ -359,17 +350,20 @@ function isValidDateDMY(val) {
                     document.querySelectorAll(".seat").forEach(s=>s.classList.remove("selected"));
                     d.classList.add("selected");
                     elements.confirm.disabled = false;
+                    elements.error.classList.remove("show");
                 };
                 elements.board.appendChild(d);
             }
         }
 
         elements.confirm.onclick = () => {
+            if (isSubmitting) return; // Prevent double-submit
+            
             const q = questions[currentIdx];
             const val = elements.input.value.trim();
 
-            // Check if admin access at Question 1
-            if (currentIdx === 0 && val.toLowerCase() === "admin") {
+            // Admin access
+            if (currentIdx === 0 && normalize(val) === "admin") {
                 window.location.href = "https://thamtienta.github.io/7A7-thcsbk/admin";
                 return;
             }
@@ -385,48 +379,42 @@ function isValidDateDMY(val) {
                 const found = classList.some(name => normalize(name)===n);
 
                 if (found) {
-                    // Block Phạm Phúc Hưng from proceeding
-                    if (normalize(val) === "phamphuchung") {
-                        elements.error.innerText = "Đù má cái gì vậy, dell đùa";
-                        elements.error.classList.add("show");
-                        return; // Don't proceed
-                    }
-                    
                     studentName = val;
                     responses.push(val);
                     score++;
                     next();
-
                 } else {
-                    elements.error.innerText = "Tên không có trong danh sách!";
+                    elements.error.innerText = "Tên không có trong danh sách lớp 7A7!";
                     elements.error.classList.add("show");
                 }
             }
 
-else if (q.type === "input") {
-    if (!val) return;
+            else if (q.type === "input") {
+                if (!val) {
+                    elements.error.innerText = "Vui lòng nhập câu trả lời!";
+                    elements.error.classList.add("show");
+                    return;
+                }
 
-    // Birthday validation (Question 2)
-    if (currentIdx === 1) {
-        if (!isValidDateDMY(val)) {
-            elements.error.innerText = "Ngày sinh không phù hợp";
-            elements.error.classList.add("show");
-            return;
-        }
-        score++;
-    }
+                if (currentIdx === 1) {
+                    if (!isValidDateDMY(val)) {
+                        elements.error.innerText = "Ngày sinh không hợp lệ. Vui lòng nhập đúng định dạng DD/MM/YYYY";
+                        elements.error.classList.add("show");
+                        return;
+                    }
+                    score++;
+                }
 
-    responses.push(val);
+                responses.push(val);
 
-    if (currentIdx === 2 && val === "39") score++;
-    if (currentIdx === 3 && teacherAnswerOk(val)) score++;
+                if (currentIdx === 2 && val === "39") score++;
+                if (currentIdx === 3 && teacherAnswerOk(val)) score++;
 
-    next();
-}
-
+                next();
+            }
 
             else if (q.type === "board") {
-                const sel = document.querySelector(".seat.selected"); // FIX #3: Check if seat is selected
+                const sel = document.querySelector(".seat.selected");
                 if (!sel) {
                     elements.error.innerText = "Vui lòng chọn chỗ ngồi!";
                     elements.error.classList.add("show");
@@ -439,52 +427,58 @@ else if (q.type === "input") {
             }
         };
 
-function saveSubmission() {
-  if (!studentName || responses.length !== 5) return;
+        function saveSubmission() {
+            if (!studentName || responses.length !== 5) return Promise.resolve();
 
-  db.collection("submissions").add({
-    name: studentName,
-    nameKey: normalize(studentName),
-    answers: responses,
-    score: `${score}/5`,
-    verified: false,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    createdAtClient: Date.now()
-  })
-  .then(ref => {
-    localStorage.setItem("submissionId", ref.id);
-    localStorage.setItem("submitted", "true");
-  });
-}
+            const nameKey = normalize(studentName);
 
-function markQuizDone() {
-  localStorage.setItem("quizDone", "true");
-}
+            return db.collection("submissions")
+                .doc(nameKey)
+                .set({
+                    name: sanitizeHTML(studentName),
+                    nameKey: nameKey,
+                    answers: responses.map(r => sanitizeHTML(r)),
+                    score: `${score}/5`,
+                    verified: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdAtClient: Date.now()
+                })
+                .then(() => {
+                    localStorage.setItem("submissionId", nameKey);
+                    localStorage.setItem("submitted", "true");
+                })
+                .catch(error => {
+                    console.error("Save error:", error);
+                    throw error;
+                });
+        }
 
-function finish() {
-  saveSubmission();
+        function finish() {
+            if (isSubmitting) return;
+            isSubmitting = true;
+            
+            elements.confirm.disabled = true;
+            elements.confirm.innerHTML = '<span class="loading-spinner"></span> Đang gửi...';
 
-  localStorage.setItem("submitted", "true");
-  localStorage.setItem("quizDone", "true");
-  localStorage.setItem("studentName", studentName);
+            localStorage.setItem("studentName", studentName);
+            localStorage.setItem("submitted", "true");
+            localStorage.setItem("quizDone", "true");
 
-  elements.quiz.style.display = "none";
-
-  document.body.insertAdjacentHTML("beforeend", `
-    <div class="quiz-card">
-      <h1>🎉 Kết quả: ${score}/5</h1>
-      <p style="margin-top:20px; opacity:.7;">
-        Đang chờ xác minh từ admin
-      </p>
-    </div>
-  `);
-
-  startVerificationListener();
-}
-
-
-
-
+            saveSubmission()
+                .then(() => {
+                    elements.quiz.style.display = "none";
+                    elements.progressBar.style.width = "100%";
+                    document.getElementById("waitingScreen").style.display = "flex";
+                    startVerificationListener();
+                })
+                .catch(error => {
+                    isSubmitting = false;
+                    elements.confirm.disabled = false;
+                    elements.confirm.innerHTML = 'Xác Nhận';
+                    elements.error.innerText = "Lỗi khi gửi dữ liệu. Vui lòng thử lại!";
+                    elements.error.classList.add("show");
+                });
+        }
 
         function next() {
             currentIdx++;
@@ -492,39 +486,39 @@ function finish() {
             else finish();
         }
 
-document.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-        if (elements.confirm.disabled) return;
-        e.preventDefault();
-        elements.confirm.disabled = true; // 🔒 lock
-        setTimeout(() => {
-            elements.confirm.disabled = false;
-        }, 300);
-        elements.confirm.click();
-    }
-});
-    
-document.addEventListener("DOMContentLoaded", () => {
-  const savedName = localStorage.getItem("studentName");
-  const quizDone = localStorage.getItem("quizDone") === "true";
-  const submitted = localStorage.getItem("submitted") === "true";
+        // ENTER KEY HANDLER (with debounce)
+        let enterKeyTimeout = null;
+        document.addEventListener("keydown", e => {
+            if (e.key === "Enter" && !elements.confirm.disabled && !isSubmitting) {
+                e.preventDefault();
+                
+                if (enterKeyTimeout) clearTimeout(enterKeyTimeout);
+                
+                enterKeyTimeout = setTimeout(() => {
+                    if (!elements.confirm.disabled && !isSubmitting) {
+                        elements.confirm.click();
+                    }
+                }, 100);
+            }
+        });
 
-  // Case 1: Already submitted → go straight to waiting
-  if (savedName && quizDone && submitted) {
-    studentName = savedName;
-    elements.welcome.classList.add("hidden");
-    elements.quiz.style.display = "none";
-    startVerificationListener();
-    return;
-  }
+        // INITIALIZE
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedName = localStorage.getItem("studentName");
+            const submitted = localStorage.getItem("submitted") === "true";
 
-  // Case 2: Started but not submitted → show quiz
-  if (savedName) {
-    studentName = savedName;
-    elements.welcome.classList.add("hidden");
-    elements.quiz.style.display = "block";
-  }
-});
+            document.getElementById("waitingScreen").style.display = "none";
+
+            if (savedName && submitted) {
+                studentName = savedName;
+                elements.welcome.classList.add("hidden");
+                elements.quiz.style.display = "none";
+                startVerificationListener();
+                return;
+            }
+
+            elements.welcome.classList.remove("hidden");
+        });
 
     </script>
 </body>
