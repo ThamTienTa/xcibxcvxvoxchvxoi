@@ -79,6 +79,8 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
 .submit-answer-btn {
   background: linear-gradient(135deg,#07FAA3,#02DC64);
   color: #050f0a;
+  font-size: 16px;
+  padding: 10px 20px;
 }
 
 .admin-btn {
@@ -198,7 +200,7 @@ const isBlank =
             ${
               s.verified
                 ? `<div style="color:#07FAA3;font-weight:800;">✔ Approved</div>`
-                : `<button class="submit-answer-btn" onclick="approve('${d.id}')">✅ Accept</button>`
+                : `<button class="submit-answer-btn" onclick="approve('${d.id}')">Accept</button>`
             }
           </div>
         `);
