@@ -1,1097 +1,734 @@
 <!DOCTYPE html>
+
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7A7 - Trang Chủ</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>7A7 - Main</title>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+
+```
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    body { 
+        font-family: 'Manrope', sans-serif; 
+        background: #050f0a; 
+        color: white; 
+        overflow: hidden;
+    }
 
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body { 
-            font-family: 'Manrope', sans-serif; 
-            background: #050f0a; 
-            color: white; 
-            overflow-x: hidden;
+    /* Login Screen */
+    #loginScreen {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, #050f0a 0%, #0a1e14 50%, #050f0a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    }
+
+    #loginScreen.hidden { display: none; }
+
+    .login-card {
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 50px 40px;
+        border: 1px solid rgba(255,255,255,0.1);
+        max-width: 450px;
+        width: 90%;
+        text-align: center;
+    }
+
+    .login-card h1 {
+        font-size: 42px;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #07FAA3, #02DC64);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 15px 20px;
+        background: rgba(255,255,255,0.05);
+        border: 2px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        color: white;
+        font-size: 16px;
+        font-family: 'Manrope', sans-serif;
+        outline: none;
+        margin-bottom: 15px;
+    }
+
+    .form-input:focus {
+        border-color: #07FAA3;
+    }
+
+    .login-btn {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #07FAA3, #02DC64);
+        border: none;
+        border-radius: 12px;
+        color: #050f0a;
+        font-weight: 800;
+        font-size: 18px;
+        cursor: pointer;
+        font-family: 'Manrope', sans-serif;
+        margin-top: 10px;
+    }
+
+    .login-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .error-msg {
+        color: #ff4444;
+        background: rgba(255,68,68,0.1);
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 15px;
+        display: none;
+        font-size: 14px;
+    }
+
+    .error-msg.show { display: block; }
+
+    /* Main App Layout */
+    #mainApp {
+        display: none;
+        height: 100vh;
+        grid-template-columns: 280px 1fr;
+    }
+
+    #mainApp.active { display: grid; }
+
+    /* Sidebar */
+    .sidebar {
+        background: rgba(255,255,255,0.03);
+        border-right: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-profile {
+        padding: 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 2px solid #07FAA3;
+    }
+
+    .user-info {
+        flex: 1;
+    }
+
+    .username {
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .coin-display {
+        font-size: 14px;
+        color: #07FAA3;
+    }
+
+    .channels {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+    }
+
+    .channel {
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .channel:hover {
+        background: rgba(7,250,163,0.1);
+    }
+
+    .channel.active {
+        background: rgba(7,250,163,0.2);
+        border-left: 3px solid #07FAA3;
+    }
+
+    .pomodoro-widget {
+        padding: 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.03);
+    }
+
+    .pomodoro-time {
+        font-size: 32px;
+        font-weight: 800;
+        text-align: center;
+        color: #07FAA3;
+        margin-bottom: 10px;
+    }
+
+    .pomodoro-controls {
+        display: flex;
+        gap: 10px;
+    }
+
+    .pomodoro-btn {
+        flex: 1;
+        padding: 10px;
+        background: rgba(7,250,163,0.2);
+        border: 1px solid #07FAA3;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .online-count {
+        text-align: center;
+        font-size: 14px;
+        margin-top: 10px;
+        opacity: 0.7;
+    }
+
+    /* Main Content */
+    .main-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .content-header {
+        padding: 20px 30px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.03);
+    }
+
+    .channel-name {
+        font-size: 24px;
+        font-weight: 800;
+    }
+
+    .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 30px;
+    }
+
+    .message {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 15px;
+    }
+
+    .message-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .message-content {
+        flex: 1;
+    }
+
+    .message-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+    }
+
+    .message-author {
+        font-weight: 700;
+        color: #07FAA3;
+    }
+
+    .message-time {
+        font-size: 12px;
+        opacity: 0.5;
+    }
+
+    .message-text {
+        line-height: 1.6;
+    }
+
+    .delete-btn {
+        padding: 4px 10px;
+        background: rgba(255,68,68,0.2);
+        border: 1px solid rgba(255,68,68,0.3);
+        border-radius: 6px;
+        color: #ff4444;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .input-container {
+        padding: 20px 30px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.03);
+        display: flex;
+        gap: 10px;
+    }
+
+    .message-input {
+        flex: 1;
+        padding: 15px 20px;
+        background: rgba(255,255,255,0.05);
+        border: 2px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        color: white;
+        font-size: 16px;
+        font-family: 'Manrope', sans-serif;
+        outline: none;
+    }
+
+    .message-input:focus {
+        border-color: #07FAA3;
+    }
+
+    .send-btn {
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #07FAA3, #02DC64);
+        border: none;
+        border-radius: 12px;
+        color: #050f0a;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .send-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Empty States */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        opacity: 0.5;
+    }
+
+    .logout-btn {
+        width: 100%;
+        padding: 12px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        #mainApp {
+            grid-template-columns: 1fr;
         }
 
-        /* Background Orbs */
-        .orb-container { 
-            position: fixed; 
-            inset: 0; 
-            z-index: 1; 
-            pointer-events: none; 
-        }
-        
-        .orb { 
-            position: absolute; 
-            border-radius: 50%; 
-            filter: blur(60px); 
-            opacity: 0.6; 
-            animation: float 20s infinite ease-in-out; 
-        }
-        
-        .orb-1 {
-            width: 800px; 
-            height: 550px;
-            background: linear-gradient(225deg, rgba(7,250,163,.9), rgba(6,228,115,.75), rgba(4,106,45,0));
-            top: 15%; 
-            right: 10%;
-        }
-        
-        .orb-2 {
-            width: 800px; 
-            height: 550px;
-            background: linear-gradient(45deg, rgba(6,55,23,0), rgba(1,183,62,.75), rgb(2,220,100));
-            top: -5%; 
-            left: -5%;
-            filter: blur(40px);
-            animation-delay: -7s;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translate(0,0) scale(1); }
-            50% { transform: translate(-20px,20px) scale(0.95); }
+        .sidebar {
+            display: none;
         }
 
-        /* Main Container */
-        .main-container {
-            position: relative;
-            z-index: 10;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        /* Header */
-        .header {
+        .sidebar.mobile-visible {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 30px;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 30px;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
         }
+    }
+</style>
+```
 
-        .logo {
-            font-size: 32px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #07FAA3, #02DC64);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .coin-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: rgba(7,250,163,0.2);
-            border-radius: 25px;
-            font-weight: 700;
-            border: 2px solid #07FAA3;
-        }
-
-        .coin-icon {
-            font-size: 20px;
-        }
-
-        .user-name {
-            font-weight: 700;
-            font-size: 16px;
-        }
-
-        .logout-btn {
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 10px;
-            color: white;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: rgba(255,255,255,0.2);
-        }
-
-        /* Grid Layout */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        /* Cards */
-        .card {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 25px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s;
-        }
-
-        .card:hover {
-            background: rgba(255,255,255,0.08);
-            transform: translateY(-5px);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-            font-size: 22px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card-icon {
-            font-size: 24px;
-        }
-
-        /* Chat Box */
-        .chat-container {
-            grid-column: span 2;
-            height: 500px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 15px;
-            margin-bottom: 15px;
-        }
-
-        .chat-message {
-            margin-bottom: 15px;
-            padding: 12px 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            border-left: 3px solid #07FAA3;
-        }
-
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
-        .message-author {
-            font-weight: 700;
-            color: #07FAA3;
-        }
-
-        .message-time {
-            font-size: 12px;
-            opacity: 0.6;
-        }
-
-        .message-text {
-            line-height: 1.5;
-        }
-
-        .chat-input-container {
-            display: flex;
-            gap: 10px;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 15px 20px;
-            background: rgba(255,255,255,0.05);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            outline: none;
-            font-family: 'Manrope', sans-serif;
-        }
-
-        .chat-input:focus {
-            border-color: #07FAA3;
-        }
-
-        .send-btn {
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #07FAA3, #02DC64);
-            border: none;
-            border-radius: 12px;
-            color: #050f0a;
-            font-weight: 800;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .send-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(7,250,163,0.3);
-        }
-
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Events */
-        .event-item {
-            padding: 15px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border-left: 4px solid #07FAA3;
-            transition: all 0.3s;
-        }
-
-        .event-item:hover {
-            background: rgba(255,255,255,0.06);
-        }
-
-        .event-date {
-            font-size: 14px;
-            color: #07FAA3;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .event-title {
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .event-desc {
-            font-size: 14px;
-            opacity: 0.7;
-        }
-
-        /* Announcements */
-        .announcement-item {
-            padding: 15px;
-            background: rgba(7,250,163,0.1);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(7,250,163,0.3);
-        }
-
-        .announcement-title {
-            font-weight: 700;
-            color: #07FAA3;
-            margin-bottom: 8px;
-        }
-
-        .announcement-text {
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        /* Timetable */
-        .timetable-container {
-            grid-column: span 2;
-        }
-
-        .timetable-actions {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .action-btn {
-            padding: 10px 20px;
-            background: rgba(7,250,163,0.2);
-            border: 2px solid #07FAA3;
-            border-radius: 10px;
-            color: white;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .action-btn:hover {
-            background: rgba(7,250,163,0.3);
-            transform: translateY(-2px);
-        }
-
-        .timetable {
-            width: 100%;
-            border-collapse: collapse;
-            background: rgba(0,0,0,0.2);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .timetable th,
-        .timetable td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .timetable th {
-            background: rgba(7,250,163,0.2);
-            color: #07FAA3;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        .timetable tr:hover {
-            background: rgba(255,255,255,0.03);
-        }
-
-        /* Coin Trading */
-        .coin-trading {
-            grid-column: span 2;
-        }
-
-        .trade-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr auto;
-            gap: 15px;
-            align-items: end;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-label {
-            font-size: 14px;
-            font-weight: 700;
-            opacity: 0.8;
-        }
-
-        .form-input,
-        .form-select {
-            padding: 12px 15px;
-            background: rgba(255,255,255,0.05);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
-            outline: none;
-            font-family: 'Manrope', sans-serif;
-        }
-
-        .form-input:focus,
-        .form-select:focus {
-            border-color: #07FAA3;
-        }
-
-        .form-select option {
-            background: #050f0a;
-            color: white;
-        }
-
-        .trade-history {
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .trade-item {
-            padding: 12px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .trade-info {
-            font-size: 14px;
-        }
-
-        .trade-amount {
-            font-weight: 800;
-            color: #07FAA3;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(7,250,163,0.5);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(7,250,163,0.7);
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            opacity: 0.5;
-        }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
-        /* Loading */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #07FAA3;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .chat-container,
-            .timetable-container,
-            .coin-trading {
-                grid-column: span 1;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .trade-form {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Print Styles */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            
-            .timetable-container,
-            .timetable-container * {
-                visibility: visible;
-            }
-            
-            .timetable-container {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                grid-column: span 1;
-            }
-
-            .timetable-actions {
-                display: none;
-            }
-
-            .orb-container {
-                display: none;
-            }
-        }
-    </style>
 </head>
 <body>
-    <div class="orb-container">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-    </div>
 
-    <div class="main-container">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo">🎓 LỚP 7A7</div>
+```
+<!-- Login Screen -->
+<div id="loginScreen">
+    <div class="login-card">
+        <h1>🎓 Lớp 7A7</h1>
+        <p style="opacity: 0.6; margin-bottom: 30px;">Đăng nhập vào hệ thống</p>
+        
+        <input 
+            type="email" 
+            class="form-input" 
+            id="loginEmail" 
+            placeholder="Email (tên@7a7.local)"
+        >
+        <input 
+            type="password" 
+            class="form-input" 
+            id="loginPassword" 
+            placeholder="Mật khẩu"
+        >
+        
+        <button class="login-btn" id="loginSubmit">Đăng Nhập</button>
+        <div class="error-msg" id="loginError"></div>
+        
+        <p style="margin-top: 20px; font-size: 14px; opacity: 0.6;">
+            Chưa có tài khoản? <a href="index.html" style="color: #07FAA3;">Làm bài test</a>
+        </p>
+    </div>
+</div>
+
+<!-- Main App -->
+<div id="mainApp">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="user-profile">
+            <img id="userAvatar" class="avatar" src="" alt="Avatar">
             <div class="user-info">
-                <div class="coin-badge">
-                    <span class="coin-icon">🪙</span>
-                    <span id="userCoins">0</span> 7A7 Coin
-                </div>
-                <div class="user-name" id="userName">Loading...</div>
-                <button class="logout-btn" onclick="logout()">Đăng xuất</button>
+                <div class="username" id="userName">Loading...</div>
+                <div class="coin-display">🪙 <span id="userCoins">0</span> coins</div>
             </div>
         </div>
 
-        <div class="content-grid">
-            <!-- Announcements -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <span class="card-icon">📢</span>
-                        Thông Báo
-                    </div>
-                </div>
-                <div id="announcementsList">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <div>Chưa có thông báo</div>
-                    </div>
-                </div>
+        <div class="channels">
+            <div class="channel active" data-channel="general">
+                💬 general-chat
             </div>
-
-            <!-- Events -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <span class="card-icon">📅</span>
-                        Sự Kiện
-                    </div>
-                </div>
-                <div id="eventsList">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🎉</div>
-                        <div>Chưa có sự kiện</div>
-                    </div>
-                </div>
+            <div class="channel" data-channel="homework">
+                📚 hỏi-bài
             </div>
-
-            <!-- Chat Box -->
-            <div class="card chat-container">
-                <div class="card-header">
-                    <div class="card-title">
-                        <span class="card-icon">💬</span>
-                        Chat Lớp
-                    </div>
-                </div>
-                <div class="chat-messages" id="chatMessages">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">💬</div>
-                        <div>Chưa có tin nhắn nào</div>
-                    </div>
-                </div>
-                <div class="chat-input-container">
-                    <input 
-                        type="text" 
-                        class="chat-input" 
-                        id="chatInput" 
-                        placeholder="Nhập tin nhắn..."
-                        maxlength="500"
-                    >
-                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-                        Gửi
-                    </button>
-                </div>
+            <div class="channel" data-channel="announcements">
+                📢 thông-báo
             </div>
-
-            <!-- Timetable -->
-            <div class="card timetable-container">
-                <div class="card-header">
-                    <div class="card-title">
-                        <span class="card-icon">📚</span>
-                        Thời Khóa Biểu
-                    </div>
-                </div>
-                <div class="timetable-actions">
-                    <button class="action-btn" onclick="window.print()">
-                        🖨️ In TKB
-                    </button>
-                    <button class="action-btn" onclick="downloadTimetable()">
-                        💾 Tải xuống
-                    </button>
-                </div>
-                <table class="timetable">
-                    <thead>
-                        <tr>
-                            <th>Tiết</th>
-                            <th>Thứ 2</th>
-                            <th>Thứ 3</th>
-                            <th>Thứ 4</th>
-                            <th>Thứ 5</th>
-                            <th>Thứ 6</th>
-                        </tr>
-                    </thead>
-                    <tbody id="timetableBody">
-                        <tr>
-                            <td><strong>1</strong></td>
-                            <td>Toán</td>
-                            <td>Văn</td>
-                            <td>Anh</td>
-                            <td>Lý</td>
-                            <td>Hóa</td>
-                        </tr>
-                        <tr>
-                            <td><strong>2</strong></td>
-                            <td>Toán</td>
-                            <td>Văn</td>
-                            <td>Anh</td>
-                            <td>Lý</td>
-                            <td>Hóa</td>
-                        </tr>
-                        <tr>
-                            <td><strong>3</strong></td>
-                            <td>Tin</td>
-                            <td>Sử</td>
-                            <td>Địa</td>
-                            <td>Sinh</td>
-                            <td>GDCD</td>
-                        </tr>
-                        <tr>
-                            <td><strong>4</strong></td>
-                            <td>Tin</td>
-                            <td>Sử</td>
-                            <td>Địa</td>
-                            <td>Sinh</td>
-                            <td>GDCD</td>
-                        </tr>
-                        <tr>
-                            <td><strong>5</strong></td>
-                            <td>Thể dục</td>
-                            <td>Âm nhạc</td>
-                            <td>Mỹ thuật</td>
-                            <td>Công nghệ</td>
-                            <td>Chào cờ</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="channel" data-channel="events">
+                📅 sự-kiện
             </div>
+        </div>
 
-            <!-- Coin Trading System -->
-            <div class="card coin-trading">
-                <div class="card-header">
-                    <div class="card-title">
-                        <span class="card-icon">🪙</span>
-                        Giao Dịch 7A7 Coin
-                    </div>
-                </div>
-                
-                <div class="trade-form">
-                    <div class="form-group">
-                        <label class="form-label">Gửi đến</label>
-                        <select class="form-select" id="recipientSelect">
-                            <option value="">Chọn bạn cùng lớp...</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Số lượng coin</label>
-                        <input 
-                            type="number" 
-                            class="form-input" 
-                            id="coinAmount" 
-                            placeholder="0"
-                            min="1"
-                        >
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Ghi chú</label>
-                        <input 
-                            type="text" 
-                            class="form-input" 
-                            id="tradeNote" 
-                            placeholder="Tặng coin..."
-                            maxlength="100"
-                        >
-                    </div>
-                    
-                    <button class="send-btn" onclick="sendCoins()">
-                        Gửi Coin
-                    </button>
-                </div>
-
-                <div class="trade-history" id="tradeHistory">
-                    <div style="font-weight: 700; margin-bottom: 15px; opacity: 0.8;">
-                        Lịch sử giao dịch
-                    </div>
-                    <div class="empty-state">
-                        <div class="empty-state-icon">💰</div>
-                        <div>Chưa có giao dịch nào</div>
-                    </div>
-                </div>
+        <!-- Pomodoro Widget -->
+        <div class="pomodoro-widget">
+            <div style="font-weight: 700; margin-bottom: 10px; font-size: 14px;">⏱️ POMODORO</div>
+            <div class="pomodoro-time" id="pomodoroTime">25:00</div>
+            <div class="pomodoro-controls">
+                <button class="pomodoro-btn" id="pomodoroStart">Start</button>
+                <button class="pomodoro-btn" id="pomodoroReset">Reset</button>
             </div>
+            <div class="online-count" id="onlineCount">👥 0 đang học</div>
+            <button class="logout-btn" id="logoutBtn">Đăng xuất</button>
         </div>
     </div>
 
-    <script>
-        // FIREBASE CONFIG
-        firebase.initializeApp({
-            apiKey: "AIzaSyBx6YfJDocmt-WJQvsaKnaUEA_JohxdfC0",
-            authDomain: "a7-thcsbk.firebaseapp.com",
-            projectId: "a7-thcsbk",
-            storageBucket: "a7-thcsbk.firebasestorage.app",
-            messagingSenderId: "165000167523",
-            appId: "1:165000167523:web:c0d38ab755b699d62e3856"
-        });
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-header">
+            <div class="channel-name" id="channelName"># general-chat</div>
+        </div>
 
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+        <div class="messages-container" id="messagesContainer">
+            <div class="empty-state">
+                Chưa có tin nhắn nào
+            </div>
+        </div>
 
-        let currentUser = null;
-        let userData = null;
+        <div class="input-container">
+            <input 
+                type="text" 
+                class="message-input" 
+                id="messageInput" 
+                placeholder="Nhập tin nhắn..."
+                maxlength="500"
+            >
+            <button class="send-btn" id="sendBtn">Gửi</button>
+        </div>
+    </div>
+</div>
 
-        // SANITIZATION
-        function sanitizeHTML(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
+<script>
+    firebase.initializeApp({
+        apiKey: "AIzaSyBx6YfJDocmt-WJQvsaKnaUEA_JohxdfC0",
+        authDomain: "a7-thcsbk.firebaseapp.com",
+        projectId: "a7-thcsbk",
+        storageBucket: "a7-thcsbk.firebasestorage.app",
+        messagingSenderId: "165000167523",
+        appId: "1:165000167523:web:c0d38ab755b699d62e3856"
+    });
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentUser = null;
+    let currentChannel = 'general';
+    let unsubscribeChat = null;
+    let pomodoroInterval = null;
+    let pomodoroSeconds = 25 * 60;
+    let pomodoroRunning = false;
+
+    // LOGIN LOGIC
+    document.getElementById('loginSubmit').onclick = async () => {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const errorMsg = document.getElementById('loginError');
+        const btn = document.getElementById('loginSubmit');
+
+        errorMsg.classList.remove('show');
+
+        if (!email || !password) {
+            errorMsg.textContent = 'Vui lòng nhập email và mật khẩu!';
+            errorMsg.classList.add('show');
+            return;
         }
 
-        // INITIALIZE
-        auth.onAuthStateChanged(user => {
-            if (!user) {
-                // Not logged in, redirect to quiz
-                window.location.href = 'index.html';
-                return;
-            }
+        btn.disabled = true;
+        btn.textContent = 'Đang đăng nhập...';
 
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+        } catch (error) {
+            let message = 'Đăng nhập thất bại!';
+            if (error.code === 'auth/user-not-found') message = 'Email không tồn tại!';
+            else if (error.code === 'auth/wrong-password') message = 'Sai mật khẩu!';
+            
+            errorMsg.textContent = message;
+            errorMsg.classList.add('show');
+            btn.disabled = false;
+            btn.textContent = 'Đăng Nhập';
+        }
+    };
+
+    // AUTH STATE
+    auth.onAuthStateChanged(user => {
+        if (user) {
             currentUser = user;
-            loadUserData();
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.add('active');
+            loadUserProfile();
             loadChat();
-            loadEvents();
-            loadAnnouncements();
-            loadClassmates();
-            loadTradeHistory();
-        });
-
-        // LOAD USER DATA
-        function loadUserData() {
-            const studentName = localStorage.getItem('studentName') || 'Học sinh';
-            document.getElementById('userName').textContent = studentName;
-
-            // Load coins from Firestore
-            db.collection('users').doc(currentUser.uid).get()
-                .then(doc => {
-                    if (doc.exists) {
-                        userData = doc.data();
-                        document.getElementById('userCoins').textContent = userData.coins || 100;
-                    } else {
-                        // Initialize new user with 100 coins
-                        const newUserData = {
-                            name: studentName,
-                            coins: 100,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        };
-                        db.collection('users').doc(currentUser.uid).set(newUserData);
-                        userData = newUserData;
-                        document.getElementById('userCoins').textContent = 100;
-                    }
-                })
-                .catch(err => console.error('Load user error:', err));
+            startOnlineTracking();
+        } else {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.remove('active');
         }
+    });
 
-        // CHAT FUNCTIONS
-        function loadChat() {
-            db.collection('chat')
-                .orderBy('timestamp', 'desc')
-                .limit(50)
-                .onSnapshot(snapshot => {
-                    const chatBox = document.getElementById('chatMessages');
-                    
-                    if (snapshot.empty) {
-                        chatBox.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-state-icon">💬</div>
-                                <div>Chưa có tin nhắn nào</div>
-                            </div>
-                        `;
-                        return;
-                    }
+    // LOAD USER PROFILE
+    function loadUserProfile() {
+        db.collection('users').doc(currentUser.uid).get()
+            .then(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('userName').textContent = data.name;
+                    document.getElementById('userAvatar').src = data.avatar || '';
+                    document.getElementById('userCoins').textContent = data.coins || 0;
 
-                    const messages = [];
-                    snapshot.forEach(doc => {
-                        messages.push({ id: doc.id, ...doc.data() });
+                    // Update status to online
+                    db.collection('users').doc(currentUser.uid).update({
+                        status: 'online',
+                        lastActive: firebase.firestore.FieldValue.serverTimestamp()
                     });
+                }
+            });
+    }
 
-                    messages.reverse(); // Show oldest first
+    // ONLINE TRACKING
+    function startOnlineTracking() {
+        // Update online users count
+        db.collection('users')
+            .where('status', '==', 'online')
+            .onSnapshot(snapshot => {
+                document.getElementById('onlineCount').textContent = `👥 ${snapshot.size} đang học`;
+            });
 
-                    chatBox.innerHTML = messages.map(msg => `
-                        <div class="chat-message">
-                            <div class="message-header">
-                                <span class="message-author">${sanitizeHTML(msg.author)}</span>
-                                <span class="message-time">${formatTime(msg.timestamp)}</span>
-                            </div>
-                            <div class="message-text">${sanitizeHTML(msg.text)}</div>
-                        </div>
-                    `).join('');
-
-                    // Auto scroll to bottom
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                }, err => {
-                    console.error('Chat load error:', err);
+        // Keep status updated
+        setInterval(() => {
+            if (currentUser) {
+                db.collection('users').doc(currentUser.uid).update({
+                    lastActive: firebase.firestore.FieldValue.serverTimestamp()
                 });
-        }
+            }
+        }, 60000); // Every minute
+    }
 
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const btn = document.getElementById('sendBtn');
-            const text = input.value.trim();
+    // CHANNEL SWITCHING
+    document.querySelectorAll('.channel').forEach(ch => {
+        ch.onclick = () => {
+            document.querySelectorAll('.channel').forEach(c => c.classList.remove('active'));
+            ch.classList.add('active');
+            currentChannel = ch.dataset.channel;
+            document.getElementById('channelName').textContent = '# ' + currentChannel;
+            loadChat();
+        };
+    });
 
-            if (!text) return;
+    // CHAT LOGIC
+    function loadChat() {
+        if (unsubscribeChat) unsubscribeChat();
 
-            btn.disabled = true;
-            btn.textContent = 'Đang gửi...';
+        const container = document.getElementById('messagesContainer');
+        container.innerHTML = '<div class="empty-state">Đang tải...</div>';
 
-            db.collection('chat').add({
-                author: userData?.name || 'Anonymous',
+        unsubscribeChat = db.collection('messages')
+            .where('channel', '==', currentChannel)
+            .orderBy('timestamp', 'desc')
+            .limit(50)
+            .onSnapshot(snapshot => {
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="empty-state">Chưa có tin nhắn nào</div>';
+                    return;
+                }
+
+                const messages = [];
+                snapshot.forEach(doc => {
+                    messages.push({ id: doc.id, ...doc.data() });
+                });
+
+                messages.reverse();
+
+                container.innerHTML = messages.map(msg => `
+                    <div class="message">
+                        <img class="message-avatar" src="${msg.avatar || ''}" alt="">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">${sanitize(msg.author)}</span>
+                                <span class="message-time">${formatTime(msg.timestamp)}</span>
+                                ${msg.userId === currentUser.uid ? 
+                                    `<button class="delete-btn" onclick="deleteMessage('${msg.id}')">Xóa</button>` : 
+                                    ''}
+                            </div>
+                            <div class="message-text">${sanitize(msg.text)}</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.scrollTop = container.scrollHeight;
+            });
+    }
+
+    // SEND MESSAGE
+    document.getElementById('sendBtn').onclick = sendMessage;
+    document.getElementById('messageInput').onkeypress = (e) => {
+        if (e.key === 'Enter') sendMessage();
+    };
+
+    async function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+        
+        if (!text) return;
+
+        const btn = document.getElementById('sendBtn');
+        btn.disabled = true;
+
+        try {
+            const userData = await db.collection('users').doc(currentUser.uid).get();
+            const user = userData.data();
+
+            await db.collection('messages').add({
+                channel: currentChannel,
+                author: user.name,
+                avatar: user.avatar,
                 text: text,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                userId: currentUser.uid
-            })
-            .then(() => {
-                input.value = '';
-            })
-            .catch(err => {
-                console.error('Send message error:', err);
-                alert('Lỗi khi gửi tin nhắn!');
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.textContent = 'Gửi';
-            });
-        }
-
-        // Enter key to send
-        document.getElementById('chatInput')?.addEventListener('keypress', e => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        // EVENTS
-        function loadEvents() {
-            db.collection('events')
-                .orderBy('date', 'asc')
-                .limit(10)
-                .onSnapshot(snapshot => {
-                    const container = document.getElementById('eventsList');
-                    
-                    if (snapshot.empty) {
-                        container.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-state-icon">🎉</div>
-                                <div>Chưa có sự kiện</div>
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    container.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        const event = doc.data();
-                        container.innerHTML += `
-                            <div class="event-item">
-                                <div class="event-date">${event.date}</div>
-                                <div class="event-title">${sanitizeHTML(event.title)}</div>
-                                <div class="event-desc">${sanitizeHTML(event.description || '')}</div>
-                            </div>
-                        `;
-                    });
-                }, err => console.error('Events load error:', err));
-        }
-
-        // ANNOUNCEMENTS
-        function loadAnnouncements() {
-            db.collection('announcements')
-                .orderBy('createdAt', 'desc')
-                .limit(5)
-                .onSnapshot(snapshot => {
-                    const container = document.getElementById('announcementsList');
-                    
-                    if (snapshot.empty) {
-                        container.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-state-icon">📭</div>
-                                <div>Chưa có thông báo</div>
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    container.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        const announcement = doc.data();
-                        container.innerHTML += `
-                            <div class="announcement-item">
-                                <div class="announcement-title">${sanitizeHTML(announcement.title)}</div>
-                                <div class="announcement-text">${sanitizeHTML(announcement.text)}</div>
-                            </div>
-                        `;
-                    });
-                }, err => console.error('Announcements load error:', err));
-        }
-
-        // COIN TRADING
-        function loadClassmates() {
-            db.collection('users').get()
-                .then(snapshot => {
-                    const select = document.getElementById('recipientSelect');
-                    select.innerHTML = '<option value="">Chọn bạn cùng lớp...</option>';
-                    
-                    snapshot.forEach(doc => {
-                        if (doc.id !== currentUser.uid) {
-                            const user = doc.data();
-                            select.innerHTML += `<option value="${doc.id}">${sanitizeHTML(user.name)}</option>`;
-                        }
-                    });
-                })
-                .catch(err => console.error('Load classmates error:', err));
-        }
-
-        function sendCoins() {
-            const recipientId = document.getElementById('recipientSelect').value;
-            const amount = parseInt(document.getElementById('coinAmount').value);
-            const note = document.getElementById('tradeNote').value.trim();
-
-            if (!recipientId) {
-                alert('Vui lòng chọn người nhận!');
-                return;
-            }
-
-            if (!amount || amount < 1) {
-                alert('Số lượng coin phải lớn hơn 0!');
-                return;
-            }
-
-            if (amount > (userData?.coins || 0)) {
-                alert('Bạn không đủ coin!');
-                return;
-            }
-
-            // Transaction
-            const batch = db.batch();
-
-            // Deduct from sender
-            const senderRef = db.collection('users').doc(currentUser.uid);
-            batch.update(senderRef, {
-                coins: firebase.firestore.FieldValue.increment(-amount)
-            });
-
-            // Add to recipient
-            const recipientRef = db.collection('users').doc(recipientId);
-            batch.update(recipientRef, {
-                coins: firebase.firestore.FieldValue.increment(amount)
-            });
-
-            // Record transaction
-            const tradeRef = db.collection('trades').doc();
-            batch.set(tradeRef, {
-                from: currentUser.uid,
-                fromName: userData.name,
-                to: recipientId,
-                amount: amount,
-                note: note || '',
+                userId: currentUser.uid,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            batch.commit()
-                .then(() => {
-                    alert('✅ Gửi coin thành công!');
-                    document.getElementById('coinAmount').value = '';
-                    document.getElementById('tradeNote').value = '';
-                    document.getElementById('recipientSelect').value = '';
-                    loadUserData();
-                })
-                .catch(err => {
-                    console.error('Trade error:', err);
-                    alert('❌ Lỗi khi gửi coin!');
-                });
+            input.value = '';
+        } catch (error) {
+            console.error('Send error:', error);
+            alert('Lỗi khi gửi tin nhắn!');
+        } finally {
+            btn.disabled = false;
         }
+    }
 
-        function loadTradeHistory() {
-            db.collection('trades')
-                .where('from', '==', currentUser.uid)
-                .orderBy('timestamp', 'desc')
-                .limit(10)
-                .onSnapshot(snapshot => {
-                    const container = document.getElementById('tradeHistory');
-                    const header = '<div style="font-weight: 700; margin-bottom: 15px; opacity: 0.8;">Lịch sử giao dịch</div>';
-                    
-                    if (snapshot.empty) {
-                        container.innerHTML = header + `
-                            <div class="empty-state">
-                                <div class="empty-state-icon">💰</div>
-                                <div>Chưa có giao dịch nào</div>
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    let html = header;
-                    snapshot.forEach(doc => {
-                        const trade = doc.data();
-                        
-                        // Get recipient name
-                        db.collection('users').doc(trade.to).get()
-                            .then(userDoc => {
-                                const recipientName = userDoc.exists ? userDoc.data().name : 'Unknown';
-                                
-                                html += `
-                                    <div class="trade-item">
-                                        <div class="trade-info">
-                                            Gửi cho <strong>${sanitizeHTML(recipientName)}</strong>
-                                            ${trade.note ? `<br><span style="opacity:0.7;">"${sanitizeHTML(trade.note)}"</span>` : ''}
-                                        </div>
-                                        <div class="trade-amount">-${trade.amount} 🪙</div>
-                                    </div>
-                                `;
-                                container.innerHTML = html;
-                            });
-                    });
-                }, err => console.error('Trade history error:', err));
+    // DELETE MESSAGE
+    function deleteMessage(messageId) {
+        if (confirm('Xóa tin nhắn này?')) {
+            db.collection('messages').doc(messageId).delete()
+                .catch(err => alert('Lỗi khi xóa!'));
         }
+    }
 
-        // UTILITIES
-        function formatTime(timestamp) {
-            if (!timestamp) return '';
-            const date = timestamp.toDate();
-            return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    // POMODORO
+    document.getElementById('pomodoroStart').onclick = () => {
+        if (pomodoroRunning) {
+            // Pause
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+            document.getElementById('pomodoroStart').textContent = 'Start';
+        } else {
+            // Start
+            pomodoroRunning = true;
+            document.getElementById('pomodoroStart').textContent = 'Pause';
+            
+            pomodoroInterval = setInterval(() => {
+                pomodoroSeconds--;
+                
+                if (pomodoroSeconds <= 0) {
+                    clearInterval(pomodoroInterval);
+                    pomodoroRunning = false;
+                    pomodoroSeconds = 25 * 60;
+                    alert('⏰ Hết giờ! Nghỉ 5 phút nhé!');
+                    document.getElementById('pomodoroStart').textContent = 'Start';
+                }
+                
+                updatePomodoroDisplay();
+            }, 1000);
         }
+    };
 
-        function logout() {
-            if (confirm('Bạn có chắc muốn đăng xuất?')) {
-                auth.signOut().then(() => {
-                    localStorage.clear();
-                    window.location.href = 'index.html';
-                });
-            }
-        }
+    document.getElementById('pomodoroReset').onclick = () => {
+        clearInterval(pomodoroInterval);
+        pomodoroRunning = false;
+        pomodoroSeconds = 25 * 60;
+        updatePomodoroDisplay();
+        document.getElementById('pomodoroStart').textContent = 'Start';
+    };
 
-        function downloadTimetable() {
-            alert('Tính năng tải xuống đang được phát triển!\nHiện tại bạn có thể dùng chức năng In (Ctrl+P)');
+    function updatePomodoroDisplay() {
+        const mins = Math.floor(pomodoroSeconds / 60);
+        const secs = pomodoroSeconds % 60;
+        document.getElementById('pomodoroTime').textContent = 
+            `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // LOGOUT
+    document.getElementById('logoutBtn').onclick = () => {
+        if (confirm('Đăng xuất?')) {
+            db.collection('users').doc(currentUser.uid).update({
+                status: 'offline'
+            }).then(() => {
+                auth.signOut();
+            });
         }
-    </script>
+    };
+
+    // UTILITIES
+    function sanitize(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function formatTime(timestamp) {
+        if (!timestamp) return '';
+        const date = timestamp.toDate();
+        return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    }
+</script>
+```
+
 </body>
 </html>
