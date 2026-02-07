@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7A7 - Admin Content Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #58a6ff;
+            margin-bottom: 10px;
+            font-size: 36px;
+        }
+
+        .subtitle {
+            opacity: 0.6;
+            margin-bottom: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #30363d;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: transparent;
+            border: none;
+            color: #8b949e;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            color: #58a6ff;
+        }
+
+        .tab.active {
+            color: #58a6ff;
+            border-bottom-color: #58a6ff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background: #0d1117;
+            border: 2px solid #30363d;
+            border-radius: 8px;
+            color: #c9d1d9;
+            font-size: 16px;
+            font-family: 'Manrope', sans-serif;
+            outline: none;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            border-color: #58a6ff;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: #238636;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        .btn:hover {
+            background: #2ea043;
+        }
+
+        .btn-danger {
+            background: #da3633;
+        }
+
+        .btn-danger:hover {
+            background: #f85149;
+        }
+
+        .items-list {
+            margin-top: 30px;
+        }
+
+        .item-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .item-title {
+            font-weight: 700;
+            color: #58a6ff;
+            font-size: 18px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 15px;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            opacity: 0.5;
+        }
+
+        .success-message,
+        .error-message {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            background: #1a472a;
+            border: 1px solid #2ea043;
+            color: #3fb950;
+        }
+
+        .error-message {
+            background: #4c1e1e;
+            border: 1px solid #f85149;
+            color: #ff7b72;
+        }
+
+        .success-message.show,
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 7A7 Content Manager</h1>
+        <p class="subtitle">Quản lý thông báo và sự kiện cho lớp</p>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('announcements')">📢 Thông Báo</button>
+            <button class="tab" onclick="switchTab('events')">📅 Sự Kiện</button>
+        </div>
+
+        <!-- Announcements Tab -->
+        <div id="announcements-tab" class="tab-content active">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Thêm Thông Báo Mới</h2>
+                
+                <div class="success-message" id="announcement-success"></div>
+                <div class="error-message" id="announcement-error"></div>
+
+                <div class="form-group">
+                    <label class="form-label">Tiêu đề</label>
+                    <input type="text" class="form-input" id="announcement-title" placeholder="Tiêu đề thông báo...">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nội dung</label>
+                    <textarea class="form-textarea" id="announcement-text" placeholder="Nội dung chi tiết..."></textarea>
+                </div>
+
+                <button class="btn" onclick="addAnnouncement()">Thêm Thông Báo</button>
+            </div>
+
+            <div class="items-list">
+                <h3 style="margin-bottom: 15px;">Thông Báo Hiện Tại</h3>
+                <div id="announcements-list">
+                    <div class="empty-state">Đang tải...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events Tab -->
+        <div id="events-tab" class="tab-content">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Thêm Sự Kiện Mới</h2>
+                
+                <div class="success-message" id="event-success"></div>
+                <div class="error-message" id="event-error"></div>
+
+                <div class="form-group">
+                    <label class="form-label">Ngày</label>
+                    <input type="date" class="form-input" id="event-date">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tiêu đề</label>
+                    <input type="text" class="form-input" id="event-title" placeholder="Tên sự kiện...">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mô tả</label>
+                    <textarea class="form-textarea" id="event-description" placeholder="Chi tiết về sự kiện..."></textarea>
+                </div>
+
+                <button class="btn" onclick="addEvent()">Thêm Sự Kiện</button>
+            </div>
+
+            <div class="items-list">
+                <h3 style="margin-bottom: 15px;">Sự Kiện Sắp Tới</h3>
+                <div id="events-list">
+                    <div class="empty-state">Đang tải...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FIREBASE CONFIG
+        firebase.initializeApp({
+            apiKey: "AIzaSyBx6YfJDocmt-WJQvsaKnaUEA_JohxdfC0",
+            authDomain: "a7-thcsbk.firebaseapp.com",
+            projectId: "a7-thcsbk",
+            storageBucket: "a7-thcsbk.firebasestorage.app",
+            messagingSenderId: "165000167523",
+            appId: "1:165000167523:web:c0d38ab755b699d62e3856"
+        });
+
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Check authentication
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                alert('Bạn cần đăng nhập để truy cập trang này!');
+                window.location.href = 'admin.html';
+            } else {
+                loadAnnouncements();
+                loadEvents();
+            }
+        });
+
+        // TAB SWITCHING
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        // SANITIZATION
+        function sanitizeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ANNOUNCEMENTS
+        function addAnnouncement() {
+            const title = document.getElementById('announcement-title').value.trim();
+            const text = document.getElementById('announcement-text').value.trim();
+            const successMsg = document.getElementById('announcement-success');
+            const errorMsg = document.getElementById('announcement-error');
+
+            successMsg.classList.remove('show');
+            errorMsg.classList.remove('show');
+
+            if (!title || !text) {
+                errorMsg.textContent = 'Vui lòng điền đầy đủ thông tin!';
+                errorMsg.classList.add('show');
+                return;
+            }
+
+            db.collection('announcements').add({
+                title: title,
+                text: text,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                successMsg.textContent = '✅ Đã thêm thông báo thành công!';
+                successMsg.classList.add('show');
+                document.getElementById('announcement-title').value = '';
+                document.getElementById('announcement-text').value = '';
+                
+                setTimeout(() => {
+                    successMsg.classList.remove('show');
+                }, 3000);
+            })
+            .catch(err => {
+                errorMsg.textContent = '❌ Lỗi: ' + err.message;
+                errorMsg.classList.add('show');
+            });
+        }
+
+        function loadAnnouncements() {
+            db.collection('announcements')
+                .orderBy('createdAt', 'desc')
+                .onSnapshot(snapshot => {
+                    const container = document.getElementById('announcements-list');
+                    
+                    if (snapshot.empty) {
+                        container.innerHTML = '<div class="empty-state">Chưa có thông báo nào</div>';
+                        return;
+                    }
+
+                    container.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        container.innerHTML += `
+                            <div class="item-card">
+                                <div class="item-header">
+                                    <div class="item-title">${sanitizeHTML(data.title)}</div>
+                                    <div class="item-actions">
+                                        <button class="btn btn-danger btn-small" onclick="deleteAnnouncement('${doc.id}')">Xóa</button>
+                                    </div>
+                                </div>
+                                <div>${sanitizeHTML(data.text)}</div>
+                            </div>
+                        `;
+                    });
+                });
+        }
+
+        function deleteAnnouncement(id) {
+            if (confirm('Bạn có chắc muốn xóa thông báo này?')) {
+                db.collection('announcements').doc(id).delete()
+                    .then(() => alert('✅ Đã xóa!'))
+                    .catch(err => alert('❌ Lỗi: ' + err.message));
+            }
+        }
+
+        // EVENTS
+        function addEvent() {
+            const date = document.getElementById('event-date').value;
+            const title = document.getElementById('event-title').value.trim();
+            const description = document.getElementById('event-description').value.trim();
+            const successMsg = document.getElementById('event-success');
+            const errorMsg = document.getElementById('event-error');
+
+            successMsg.classList.remove('show');
+            errorMsg.classList.remove('show');
+
+            if (!date || !title) {
+                errorMsg.textContent = 'Vui lòng điền ngày và tiêu đề!';
+                errorMsg.classList.add('show');
+                return;
+            }
+
+            // Format date as DD/MM/YYYY
+            const [year, month, day] = date.split('-');
+            const formattedDate = `${day}/${month}/${year}`;
+
+            db.collection('events').add({
+                date: formattedDate,
+                title: title,
+                description: description,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                successMsg.textContent = '✅ Đã thêm sự kiện thành công!';
+                successMsg.classList.add('show');
+                document.getElementById('event-date').value = '';
+                document.getElementById('event-title').value = '';
+                document.getElementById('event-description').value = '';
+                
+                setTimeout(() => {
+                    successMsg.classList.remove('show');
+                }, 3000);
+            })
+            .catch(err => {
+                errorMsg.textContent = '❌ Lỗi: ' + err.message;
+                errorMsg.classList.add('show');
+            });
+        }
+
+        function loadEvents() {
+            db.collection('events')
+                .orderBy('createdAt', 'desc')
+                .onSnapshot(snapshot => {
+                    const container = document.getElementById('events-list');
+                    
+                    if (snapshot.empty) {
+                        container.innerHTML = '<div class="empty-state">Chưa có sự kiện nào</div>';
+                        return;
+                    }
+
+                    container.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        container.innerHTML += `
+                            <div class="item-card">
+                                <div class="item-header">
+                                    <div>
+                                        <div style="color: #58a6ff; font-size: 14px; margin-bottom: 5px;">${sanitizeHTML(data.date)}</div>
+                                        <div class="item-title">${sanitizeHTML(data.title)}</div>
+                                    </div>
+                                    <div class="item-actions">
+                                        <button class="btn btn-danger btn-small" onclick="deleteEvent('${doc.id}')">Xóa</button>
+                                    </div>
+                                </div>
+                                ${data.description ? `<div style="margin-top: 10px; opacity: 0.7;">${sanitizeHTML(data.description)}</div>` : ''}
+                            </div>
+                        `;
+                    });
+                });
+        }
+
+        function deleteEvent(id) {
+            if (confirm('Bạn có chắc muốn xóa sự kiện này?')) {
+                db.collection('events').doc(id).delete()
+                    .then(() => alert('✅ Đã xóa!'))
+                    .catch(err => alert('❌ Lỗi: ' + err.message));
+            }
+        }
+    </script>
+</body>
+</html>
