@@ -2,16 +2,22 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8" />
-<title>7A7</title>
+<title>7A7 Admin Panel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f0a; color: white; }
+body { 
+  font-family: 'Manrope', sans-serif; 
+  overflow-x: hidden; 
+  background: #050f0a; 
+  color: white; 
+}
 
 .hero-section {
   position: relative;
@@ -25,7 +31,13 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
 }
 
 .orb-container { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-.orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .8; animation: float 20s infinite ease-in-out; }
+.orb { 
+  position: absolute; 
+  border-radius: 50%; 
+  filter: blur(60px); 
+  opacity: .8; 
+  animation: float 20s infinite ease-in-out; 
+}
 
 .orb-1 {
   width: 800px; height: 550px;
@@ -53,10 +65,10 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
 }
 
 .main-title {
-  font-size: clamp(48px, 8vw, 90px);
+  font-size: clamp(32px, 6vw, 72px);
   font-weight: 800;
   margin-bottom: 30px;
-  opacity: .6;
+  opacity: .9;
 }
 
 .subtitle {
@@ -66,35 +78,121 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
   margin-bottom: 50px;
 }
 
-.cta-button,
-.submit-answer-btn {
-  font-size: 18px;
+.login-container {
+  position: relative;
+  z-index: 10;
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 40px;
+  background: rgba(255,255,255,.08);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,.1);
+}
+
+.input-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: .8;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 15px 20px;
+  font-size: 16px;
+  background: rgba(255,255,255,.05);
+  border: 2px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  color: white;
+  outline: none;
+  font-family: 'Manrope', sans-serif;
+  transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+  border-color: #07FAA3;
+}
+
+.login-btn,
+.submit-answer-btn,
+.delete-btn {
+  font-size: 16px;
   font-weight: 800;
   border-radius: 12px;
   border: none;
   cursor: pointer;
   backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg,#07FAA3,#02DC64);
+  color: #050f0a;
+  margin-top: 10px;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(7,250,163,0.3);
+}
+
+.login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .submit-answer-btn {
   background: linear-gradient(135deg,#07FAA3,#02DC64);
   color: #050f0a;
-  font-size: 16px;
   padding: 10px 20px;
+  margin-right: 10px;
 }
 
-.admin-btn {
-  padding: 15px 37.5px;
-  background: rgba(255,255,255,.1);
-  color: white;
-  border: 1px solid rgba(255,255,255,.2);
+.submit-answer-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(7,250,163,0.3);
+}
+
+.submit-answer-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.delete-btn {
+  background: rgba(244,135,113,0.2);
+  color: #f48771;
+  padding: 10px 20px;
+  border: 1px solid rgba(244,135,113,0.3);
+}
+
+.delete-btn:hover {
+  background: rgba(244,135,113,0.3);
+}
+
+.error-message {
+  color: #f48771;
+  font-size: 14px;
+  margin-top: 15px;
+  padding: 12px;
+  background: rgba(244,135,113,0.1);
   border-radius: 8px;
-  cursor: pointer;
-  z-index: 1000;
+  border: 1px solid rgba(244,135,113,0.3);
+  display: none;
 }
 
-.admin-btn:hover {
-  background: rgba(255,255,255,.2);
+.error-message.show {
+  display: block;
 }
 
 .admin-panel {
@@ -104,55 +202,303 @@ body { font-family: 'Manrope', sans-serif; overflow-x: hidden; background: #050f
   z-index: 2000;
   padding: 40px;
   overflow-y: auto;
-  opacity: 1;
+}
+
+.admin-header {
+  max-width: 1200px;
+  margin: 0 auto 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.admin-header h1 {
+  font-size: clamp(24px, 4vw, 48px);
+  margin: 0;
+}
+
+.admin-stats {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: rgba(255,255,255,.05);
+  padding: 15px 25px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.1);
+}
+
+.stat-card .label {
+  font-size: 12px;
+  opacity: .6;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+
+.stat-card .value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #07FAA3;
+  margin-top: 5px;
+}
+
+.logout-btn {
+  padding: 12px 24px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.logout-btn:hover {
+  background: rgba(255,255,255,.2);
+}
+
+.submission-list {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  padding: 10px 20px;
+  background: rgba(255,255,255,.05);
+  border: 2px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.filter-tab:hover {
+  background: rgba(255,255,255,.08);
+}
+
+.filter-tab.active {
+  background: rgba(7,250,163,.2);
+  border-color: #07FAA3;
+  color: #07FAA3;
 }
 
 .submission-card {
   background: rgba(255,255,255,.05);
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 15px;
+  padding: 25px;
+  border-radius: 16px;
+  margin-bottom: 20px;
   border: 1px solid rgba(255,255,255,.1);
+  transition: all 0.3s ease;
+  position: relative;
 }
 
-.idk {
-  opacity: 1.0;
-  color: white;
+.submission-card:hover {
+  background: rgba(255,255,255,.08);
+  transform: translateY(-2px);
+}
+
+.submission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.submission-name {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.submission-score {
+  display: inline-block;
+  padding: 6px 14px;
+  background: rgba(7,250,163,.2);
+  color: #07FAA3;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.submission-answers {
+  margin: 20px 0;
+  padding: 15px;
+  background: rgba(0,0,0,.2);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.submission-answers div {
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+
+.submission-answers div:last-child {
+  border-bottom: none;
+}
+
+.submission-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(7,250,163,.2);
+  color: #07FAA3;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.submission-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.loading-screen {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255,255,255,.2);
+  border-radius: 50%;
+  border-top-color: #07FAA3;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  opacity: .6;
+}
+
+.empty-state h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    flex-direction: column;
+    align-items: start;
+  }
+  
+  .submission-card {
+    padding: 20px;
+  }
+  
+  .submission-actions {
+    width: 100%;
+  }
+  
+  .submit-answer-btn,
+  .delete-btn {
+    flex: 1;
+  }
+}
+
+.hidden {
+  display: none !important;
 }
 </style>
 </head>
 <body>
-<div id="adminPanel" class="admin-panel">
-  <div id="submissionList"></div>
-</div>
-<section class="hero-section">
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="hero-section">
   <div class="orb-container">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
   </div>
 
   <div class="content">
-    <h1 class="main-title">📋 7A7 Admin Panel</h1>
+    <h1 class="main-title">🔐 7A7 Admin Panel</h1>
     <p class="subtitle">Quản lý xác minh học sinh</p>
+    
+    <div class="login-container">
+      <div class="input-group">
+        <label for="emailInput">Email</label>
+        <input type="email" id="emailInput" placeholder="admin@example.com" autocomplete="email">
+      </div>
+      
+      <div class="input-group">
+        <label for="passwordInput">Password</label>
+        <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      
+      <button class="login-btn" id="loginBtn">Đăng Nhập</button>
+      
+      <div class="error-message" id="loginError"></div>
+    </div>
   </div>
-</section>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="admin-panel">
+  <div class="admin-header">
+    <div>
+      <h1>📋 Quản lý học sinh</h1>
+    </div>
+    
+    <div class="admin-stats">
+      <div class="stat-card">
+        <div class="label">Tổng số</div>
+        <div class="value" id="totalCount">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Chờ duyệt</div>
+        <div class="value" id="pendingCount">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Đã duyệt</div>
+        <div class="value" id="approvedCount">0</div>
+      </div>
+    </div>
+    
+    <button class="logout-btn" id="logoutBtn">Đăng Xuất</button>
+  </div>
+  
+  <div class="submission-list">
+    <div class="filter-tabs">
+      <div class="filter-tab active" data-filter="all">Tất cả</div>
+      <div class="filter-tab" data-filter="pending">Chờ duyệt</div>
+      <div class="filter-tab" data-filter="approved">Đã duyệt</div>
+    </div>
+    
+    <div id="submissionList">
+      <div class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p style="margin-top: 20px; opacity: .6;">Đang tải dữ liệu...</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-/* ========= PASSCODE PROMPT ON LOAD ========= */
-window.onload = () => {
-  const pass = prompt("🔐 Câu hỏi bảo mật:\nNhập passcode để vào Admin");
-
-  if (pass !== "Tamzin15613") {
-    alert("❌ Truy cập bị từ chối");
-    location.href = "https://thamtienta.github.io/7A7-thcsbk/";
-    return;
-  }
-
-  document.getElementById("adminPanel").style.display = "block";
-  loadSubmissions();
-};
-
-/* ========= FIREBASE ========= */
+/* ========= FIREBASE INIT ========= */
 firebase.initializeApp({
   apiKey: "AIzaSyBx6YfJDocmt-WJQvsaKnaUEA_JohxdfC0",
   authDomain: "a7-thcsbk.firebaseapp.com",
@@ -161,74 +507,281 @@ firebase.initializeApp({
   messagingSenderId: "165000167523",
   appId: "1:165000167523:web:c0d38ab755b699d62e3856"
 });
+
+const auth = firebase.auth();
 const db = firebase.firestore();
+
+let currentFilter = 'all';
+let allSubmissions = [];
+
+/* ========= SANITIZATION ========= */
+function sanitizeHTML(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ========= AUTH STATE ========= */
+auth.onAuthStateChanged(user => {
+  if (user) {
+    // User logged in
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    loadSubmissions();
+  } else {
+    // User logged out
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminPanel').style.display = 'none';
+  }
+});
+
+/* ========= LOGIN ========= */
+document.getElementById('loginBtn').onclick = () => {
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+  const errorMsg = document.getElementById('loginError');
+  const loginBtn = document.getElementById('loginBtn');
+  
+  if (!email || !password) {
+    errorMsg.textContent = 'Vui lòng nhập email và password';
+    errorMsg.classList.add('show');
+    return;
+  }
+  
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'Đang đăng nhập...';
+  errorMsg.classList.remove('show');
+  
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      // Success - auth state listener will handle UI
+      document.getElementById('emailInput').value = '';
+      document.getElementById('passwordInput').value = '';
+    })
+    .catch(error => {
+      console.error('Login error:', error);
+      
+      let message = 'Đăng nhập thất bại';
+      if (error.code === 'auth/user-not-found') {
+        message = 'Email không tồn tại';
+      } else if (error.code === 'auth/wrong-password') {
+        message = 'Mật khẩu không đúng';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'Email không hợp lệ';
+      } else if (error.code === 'auth/too-many-requests') {
+        message = 'Quá nhiều lần thử. Vui lòng thử lại sau';
+      }
+      
+      errorMsg.textContent = message;
+      errorMsg.classList.add('show');
+    })
+    .finally(() => {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Đăng Nhập';
+    });
+};
+
+// Enter key for login
+document.getElementById('passwordInput').addEventListener('keypress', e => {
+  if (e.key === 'Enter') {
+    document.getElementById('loginBtn').click();
+  }
+});
+
+/* ========= LOGOUT ========= */
+document.getElementById('logoutBtn').onclick = () => {
+  if (confirm('Bạn có chắc muốn đăng xuất?')) {
+    auth.signOut();
+  }
+};
 
 /* ========= LOAD SUBMISSIONS ========= */
 function loadSubmissions() {
+  const listEl = document.getElementById('submissionList');
+  listEl.innerHTML = '<div class="loading-screen"><div class="loading-spinner"></div><p style="margin-top:20px;opacity:.6;">Đang tải...</p></div>';
+  
   db.collection("submissions")
+    .orderBy("createdAt", "desc")
     .get()
     .then(snap => {
-      const list = [];
+      allSubmissions = [];
       const deletes = [];
 
       snap.forEach(d => {
         const s = d.data();
 
-        // 🔥 DELETE BLANK / BROKEN SUBMISSIONS
-const isBlank =
-  !s.name || s.name.trim() === "" ||
-  !s.nameKey || s.nameKey.trim() === "" ||
-  !Array.isArray(s.answers) ||
-  s.answers.length === 0;
-
+        // Delete blank submissions
+        const isBlank =
+          !s.name || s.name.trim() === "" ||
+          !s.nameKey || s.nameKey.trim() === "" ||
+          !Array.isArray(s.answers) ||
+          s.answers.length === 0;
 
         if (isBlank) {
           deletes.push(db.collection("submissions").doc(d.id).delete());
-          return; // skip rendering
+          return;
         }
 
-        // ✅ VALID SUBMISSION
-        list.push(`
-          <div class="submission-card">
-            <b style="font-size:20px;">${s.name}</b><br>
-            <span style="opacity:.6;">Score: ${s.score}</span>
-
-            <div style="margin:10px 0;">
-              ${s.answers.join(" | ")}
-            </div>
-
-            ${
-              s.verified
-                ? `<div style="color:#07FAA3;font-weight:800;">✔ Approved</div>`
-                : `<button class="submit-answer-btn" onclick="approve('${d.id}')">Accept</button>`
-            }
-          </div>
-        `);
+        allSubmissions.push({
+          id: d.id,
+          ...s
+        });
       });
-
-      // Render valid ones
-      document.getElementById("submissionList").innerHTML = list.join("");
 
       // Execute deletes
       if (deletes.length) {
         Promise.all(deletes).then(() => {
-          console.log("🧹 Blank submissions deleted:", deletes.length);
+          console.log("🧹 Cleaned up blank submissions:", deletes.length);
+        }).catch(err => {
+          console.error("Delete error:", err);
         });
+      }
+
+      updateStats();
+      renderSubmissions();
+    })
+    .catch(error => {
+      console.error('Load error:', error);
+      listEl.innerHTML = '<div class="empty-state"><h3>❌ Lỗi tải dữ liệu</h3><p>Vui lòng thử lại sau</p></div>';
+    });
+}
+
+/* ========= UPDATE STATS ========= */
+function updateStats() {
+  const total = allSubmissions.length;
+  const approved = allSubmissions.filter(s => s.verified === true).length;
+  const pending = total - approved;
+  
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('pendingCount').textContent = pending;
+  document.getElementById('approvedCount').textContent = approved;
+}
+
+/* ========= FILTER SUBMISSIONS ========= */
+document.querySelectorAll('.filter-tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentFilter = tab.dataset.filter;
+    renderSubmissions();
+  };
+});
+
+/* ========= RENDER SUBMISSIONS ========= */
+function renderSubmissions() {
+  const listEl = document.getElementById('submissionList');
+  
+  let filtered = allSubmissions;
+  if (currentFilter === 'pending') {
+    filtered = allSubmissions.filter(s => !s.verified);
+  } else if (currentFilter === 'approved') {
+    filtered = allSubmissions.filter(s => s.verified);
+  }
+  
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<div class="empty-state"><h3>📭 Không có dữ liệu</h3><p>Chưa có học sinh nào trong danh mục này</p></div>';
+    return;
+  }
+  
+  const html = filtered.map(s => `
+    <div class="submission-card" data-id="${s.id}">
+      <div class="submission-header">
+        <div>
+          <div class="submission-name">${sanitizeHTML(s.name)}</div>
+          <span class="submission-score">Score: ${sanitizeHTML(s.score)}</span>
+        </div>
+        ${s.verified ? 
+          '<span class="submission-status">✅ Đã duyệt</span>' : 
+          '<span class="submission-status" style="background:rgba(255,193,7,.2);color:#ffc107;">⏳ Chờ duyệt</span>'
+        }
+      </div>
+
+      <div class="submission-answers">
+        ${s.answers.map((ans, idx) => `
+          <div><strong>Câu ${idx + 1}:</strong> ${sanitizeHTML(ans)}</div>
+        `).join('')}
+      </div>
+
+      <div class="submission-actions">
+        ${!s.verified ? 
+          `<button class="submit-answer-btn" onclick="approve('${s.id}')">✅ Duyệt</button>` :
+          `<button class="submit-answer-btn" disabled>✅ Đã duyệt</button>`
+        }
+        <button class="delete-btn" onclick="deleteSubmission('${s.id}', '${sanitizeHTML(s.name)}')">🗑️ Xóa</button>
+      </div>
+    </div>
+  `).join('');
+  
+  listEl.innerHTML = html;
+}
+
+/* ========= APPROVE ========= */
+function approve(docId) {
+  const card = document.querySelector(`[data-id="${docId}"]`);
+  const btn = card.querySelector('.submit-answer-btn');
+  
+  if (!btn || btn.disabled) return;
+  
+  btn.disabled = true;
+  btn.textContent = '⏳ Đang xử lý...';
+  
+  db.collection("submissions").doc(docId).update({
+    verified: true,
+    approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .then(() => {
+    console.log('✅ Approved:', docId);
+    loadSubmissions(); // Refresh
+  })
+  .catch(error => {
+    console.error('Approve error:', error);
+    alert('Lỗi khi duyệt: ' + error.message);
+    btn.disabled = false;
+    btn.textContent = '✅ Duyệt';
+  });
+}
+
+/* ========= DELETE ========= */
+function deleteSubmission(docId, name) {
+  if (!confirm(`Bạn có chắc muốn xóa submission của "${name}"?\n\nHành động này không thể hoàn tác!`)) {
+    return;
+  }
+  
+  const card = document.querySelector(`[data-id="${docId}"]`);
+  if (card) {
+    card.style.opacity = '0.5';
+    card.style.pointerEvents = 'none';
+  }
+  
+  db.collection("submissions").doc(docId).delete()
+    .then(() => {
+      console.log('🗑️ Deleted:', docId);
+      loadSubmissions(); // Refresh
+    })
+    .catch(error => {
+      console.error('Delete error:', error);
+      alert('Lỗi khi xóa: ' + error.message);
+      if (card) {
+        card.style.opacity = '1';
+        card.style.pointerEvents = 'auto';
       }
     });
 }
 
+/* ========= AUTO REFRESH (Optional) ========= */
+// Refresh every 30 seconds to catch new submissions
+let refreshInterval = null;
 
-/* ========= APPROVE ========= */
-function approve(docId) {
-  db.collection("submissions").doc(docId).update({
-    verified: true,
-    approvedAt: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(() => {
-    loadSubmissions(); // 🔄 refresh UI
-  });
-}
-
+auth.onAuthStateChanged(user => {
+  if (user && !refreshInterval) {
+    refreshInterval = setInterval(() => {
+      loadSubmissions();
+    }, 30000); // 30 seconds
+  } else if (!user && refreshInterval) {
+    clearInterval(refreshInterval);
+    refreshInterval = null;
+  }
+});
 </script>
 
 </body>
