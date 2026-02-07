@@ -11,6 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 ```
 <style>
@@ -125,6 +126,52 @@
         </div>
     </div>
 
+    <!-- Profile Setup Screen (after approval) -->
+    <div class="quiz-container" id="profileSetup" style="display: none;">
+        <div class="quiz-card">
+            <h1 style="font-size: 36px; margin-bottom: 10px; background: linear-gradient(135deg, #07FAA3, #02DC64); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🎉 Chào mừng!</h1>
+            <p class="subtitle" style="margin-bottom: 30px;">Hãy tạo tài khoản của bạn</p>
+
+            <div style="background: rgba(7,250,163,0.1); border: 1px solid rgba(7,250,163,0.3); padding: 15px; border-radius: 12px; margin-bottom: 30px; font-size: 14px;">
+                ℹ️ Thông tin này sẽ được dùng để đăng nhập vào hệ thống lớp 7A7
+            </div>
+
+            <div class="input-container">
+                <label style="display: block; margin-bottom: 10px; font-weight: 700; color: #07FAA3; font-size: 14px; text-align: left;">Tên hiển thị</label>
+                <input type="text" id="displayName" class="name-input" readonly style="margin-bottom: 20px;">
+            </div>
+
+            <div class="input-container">
+                <label style="display: block; margin-bottom: 10px; font-weight: 700; color: #07FAA3; font-size: 14px; text-align: left;">Ảnh đại diện</label>
+                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                    <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+                    <button onclick="document.getElementById('avatarUpload').click()" style="flex: 1; padding: 12px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; color: white; cursor: pointer; font-weight: 600; font-family: 'Manrope', sans-serif;">
+                        📸 Chọn từ thư viện
+                    </button>
+                    <button id="autoAssignBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #07FAA3, #02DC64); border: none; border-radius: 10px; color: #050f0a; font-weight: 700; cursor: pointer; font-family: 'Manrope', sans-serif;">
+                        🎲 Tự động chọn
+                    </button>
+                </div>
+                <div id="avatarPreview" style="text-align: center; margin-bottom: 20px; display: none;">
+                    <img id="avatarImg" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #07FAA3; object-fit: cover;">
+                </div>
+            </div>
+
+            <div class="input-container">
+                <label style="display: block; margin-bottom: 10px; font-weight: 700; color: #07FAA3; font-size: 14px; text-align: left;">Mật khẩu (để đăng nhập)</label>
+                <input type="password" id="setupPassword" class="name-input" placeholder="Tối thiểu 6 ký tự" minlength="6" style="margin-bottom: 20px;">
+            </div>
+
+            <div class="input-container">
+                <label style="display: block; margin-bottom: 10px; font-weight: 700; color: #07FAA3; font-size: 14px; text-align: left;">Nhập lại mật khẩu</label>
+                <input type="password" id="setupConfirmPassword" class="name-input" placeholder="Nhập lại mật khẩu" style="margin-bottom: 20px;">
+            </div>
+
+            <button class="submit-answer-btn" id="createAccountBtn">Tạo Tài Khoản</button>
+            <div class="error-message" id="setupError"></div>
+        </div>
+    </div>
+
 </section>
 
 <script>
@@ -212,9 +259,10 @@
                         unsubscribeListener();
                         unsubscribeListener = null;
                     }
-                    localStorage.clear();
-                    // 🔧 FIX: Redirect to profile creation instead of main
-                    window.location.href = "profile-setup.html";
+                    // Show profile setup screen
+                    document.getElementById("waitingScreen").style.display = "none";
+                    document.getElementById("profileSetup").style.display = "block";
+                    document.getElementById("displayName").value = studentName;
                     return;
                 }
 
@@ -516,6 +564,130 @@
         elements.welcome.classList.remove("hidden");
         elements.quiz.style.display = "none";
     });
+
+    // PROFILE SETUP LOGIC
+    let selectedAvatarFile = null;
+    let selectedAvatarUrl = null;
+
+    // Auto-assign 7A7 avatar
+    const defaultAvatars = [
+        'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%2307FAA3" width="100" height="100"/><text x="50" y="50" font-size="40" text-anchor="middle" dy=".3em" fill="white" font-family="Arial">7A7</text></svg>',
+        'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%2302DC64"/><text x="50" y="50" font-size="35" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-weight="bold">7A7</text></svg>',
+        'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23FF6B6B" width="100" height="100"/><text x="50" y="50" font-size="30" text-anchor="middle" dy=".3em" fill="white" font-family="Arial">🎓</text></svg>',
+        'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%234ECDC4" width="100" height="100"/><text x="50" y="50" font-size="30" text-anchor="middle" dy=".3em" fill="white" font-family="Arial">📚</text></svg>',
+        'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23FFE66D" width="100" height="100"/><text x="50" y="50" font-size="30" text-anchor="middle" dy=".3em" fill="white" font-family="Arial">✨</text></svg>'
+    ];
+
+    document.getElementById('autoAssignBtn').onclick = () => {
+        const randomAvatar = defaultAvatars[Math.floor(Math.random() * defaultAvatars.length)];
+        selectedAvatarUrl = randomAvatar;
+        selectedAvatarFile = null;
+        
+        document.getElementById('avatarImg').src = randomAvatar;
+        document.getElementById('avatarPreview').style.display = 'block';
+    };
+
+    // Upload from gallery
+    document.getElementById('avatarUpload').onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Ảnh quá lớn! Vui lòng chọn ảnh dưới 5MB');
+                return;
+            }
+
+            selectedAvatarFile = file;
+            selectedAvatarUrl = null;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('avatarImg').src = e.target.result;
+                document.getElementById('avatarPreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // Create account
+    document.getElementById('createAccountBtn').onclick = async () => {
+        const password = document.getElementById('setupPassword').value;
+        const confirmPassword = document.getElementById('setupConfirmPassword').value;
+        const errorMsg = document.getElementById('setupError');
+        const btn = document.getElementById('createAccountBtn');
+
+        errorMsg.classList.remove('show');
+
+        if (!password || password.length < 6) {
+            errorMsg.textContent = 'Mật khẩu phải có ít nhất 6 ký tự!';
+            errorMsg.classList.add('show');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            errorMsg.textContent = 'Mật khẩu không khớp!';
+            errorMsg.classList.add('show');
+            return;
+        }
+
+        if (!selectedAvatarUrl && !selectedAvatarFile) {
+            errorMsg.textContent = 'Vui lòng chọn ảnh đại diện!';
+            errorMsg.classList.add('show');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading-spinner"></span> Đang tạo tài khoản...';
+
+        try {
+            // Create email from student name
+            const email = normalize(studentName) + "@7a7.local";
+
+            // Create Firebase Auth account
+            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+            const user = userCredential.user;
+
+            let avatarUrl = selectedAvatarUrl;
+
+            // If user uploaded a file, upload to Firebase Storage
+            if (selectedAvatarFile) {
+                const storageRef = firebase.storage().ref();
+                const avatarRef = storageRef.child(`avatars/${user.uid}`);
+                await avatarRef.put(selectedAvatarFile);
+                avatarUrl = await avatarRef.getDownloadURL();
+            }
+
+            // Create user profile in Firestore
+            await db.collection('users').doc(user.uid).set({
+                name: studentName,
+                email: email,
+                avatar: avatarUrl,
+                coins: 0,
+                status: 'online',
+                showOnline: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastActive: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            // Clear localStorage
+            localStorage.clear();
+            
+            // Redirect to main
+            window.location.href = 'main.html';
+
+        } catch (error) {
+            console.error('Setup error:', error);
+            
+            let message = 'Lỗi khi tạo tài khoản!';
+            if (error.code === 'auth/email-already-in-use') {
+                message = 'Tài khoản đã tồn tại! Hãy đăng nhập tại main.html';
+            }
+            
+            errorMsg.textContent = message;
+            errorMsg.classList.add("show");
+            btn.disabled = false;
+            btn.innerHTML = 'Tạo Tài Khoản';
+        }
+    };
 
 </script>
 ```
